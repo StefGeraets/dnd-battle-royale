@@ -6,6 +6,7 @@ export type Zone = { x: number; y: number; r: number };
 export type GamePhase = 'IDLE' | 'WARNING' | 'SHRINKING' | 'STABLE';
 
 const SYNC_CHANNEL = 'dnd_royale_sync';
+const SAVE_KEY = 'dnd_royale_save_v1';
 export const GRID_ROWS = 20;
 export const GRID_COLS = 20;
 
@@ -58,11 +59,11 @@ export class GameEngine {
     this.#isDm = isDm;
 
     if (browser ) {
-      console.log('setup');
       this.#channel = new BroadcastChannel(SYNC_CHANNEL);
-      console.log('channel', this.#channel);
+      
 
       if (this.#isDm) {
+        this.#loadState();
         this.#setupDm();
       } else {
         this.#setupPresenter();
@@ -80,8 +81,12 @@ export class GameEngine {
     } catch (e) {
       console.error('[GameEngine] Failed to create worker:', e);
     }
-    // Broadcast Loop: Whenever state changes, we could push updates.
-    // For simplicity in a game loop, we broadcast on every Tick;
+  
+    this.#channel!.onmessage = (event) => {
+      if (event.data.type === 'REQUEST_SYNC') {
+        this.#broadcast();
+      }
+    }
   }
 
   toggleTimer() {
@@ -112,6 +117,10 @@ export class GameEngine {
     }
 
     this.#broadcast();
+
+    if (this.elapsedTime % 1000 === 0) {
+      this.#saveState();
+    }
   }
 
   #broadcast() {
@@ -133,6 +142,61 @@ export class GameEngine {
     this.#channel?.postMessage(payload);
   }
 
+  // Persist logic
+  #saveState() {
+    if (!this.#isDm) return;
+
+    const data = {
+      elapsedTime: this.elapsedTime,
+      playerPos: this.playerPos,
+      activeZone: this.activeZone,
+      targetZone: this.targetZone,
+      phase: this.phase,
+      shrinkStartTime: this.shrinkStartTime,
+      shrinkDuration: this.shrinkDuration,
+      nextRoundIndex: this.nextRoundIndex,
+      timestamp: Date.now()
+    }
+
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+  }
+
+  #loadState() {
+    if (!this.#isDm) return;
+
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return;
+
+    try {
+      const data = JSON.parse(raw);
+      console.log('[GameEngine] Restoring saved game...', data);
+
+      // Restore all state
+      this.elapsedTime = data.elapsedTime;
+      this.playerPos = data.playerPos;
+      this.activeZone = data.activeZone;
+      this.targetZone = data.targetZone;
+      this.phase = data.phase;
+      this.shrinkStartTime = data.shrinkStartTime;
+      this.shrinkDuration = data.shrinkDuration;
+      this.nextRoundIndex = data.nextRoundIndex;
+      
+      // Note: We do NOT restore 'isRunning'. 
+      // It is safer to start PAUSED after a reload so the DM can get their bearings.
+      this.isRunning = false;
+    } catch (e) {
+      console.error('[GameEngine] Failed to load save:', e);
+    }
+  }
+
+  resetGame() {
+    if (!this.#isDm) return;
+
+    localStorage.removeItem(SAVE_KEY);
+
+    window.location.reload();
+  }
+
   // ACTIONS
 
   movePlayer(dx: number, dy: number) {
@@ -144,7 +208,10 @@ export class GameEngine {
     if (newX >= 0 && newX < GRID_COLS) this.playerPos.x = newX;
     if (newY >= 0 && newY < GRID_ROWS) this.playerPos.y = newY;
     
-    if (!this.isRunning) this.#broadcast(); // Manually update if paused
+    if (!this.isRunning) {
+      this.#broadcast(); // Manually update if paused
+      this.#saveState();
+    }
   }
 
   setNextZoneCenter(x: number, y:number) {
@@ -153,6 +220,7 @@ export class GameEngine {
     this.targetZone = {x, y, r: this.nextRound.radius };
 
     this.#broadcast();
+    this.#saveState();
   }
 
   startShrinking(durationSeconds: number) {
@@ -196,6 +264,10 @@ export class GameEngine {
   #setupPresenter() {
     if (!this.#channel) return;
     this.#channel.onmessage = (event) => {
+      if (event.data.type === 'REQUEST_SYNC') {
+        return;
+      }
+
       const d = event.data;
       // Bulk update state
       this.elapsedTime = d.elapsedTime;
@@ -209,5 +281,7 @@ export class GameEngine {
       this.activeZone = d.activeZone;
       this.targetZone = d.targetZone;
     }
+
+    this.#channel.postMessage({ type: 'REQUEST_SYNC' });
   }
 }

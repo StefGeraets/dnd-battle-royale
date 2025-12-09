@@ -144,6 +144,21 @@
 					<div>Target Y: {game.targetZone.y.toFixed(1)}</div>
 				</div>
 			</details>
+
+			<div class="p-4 border-t border-zinc-800 mt-auto">
+				<button
+					class="w-full text-xs text-red-900 hover:text-red-500 hover:bg-red-950/30 p-2 rounded transition-colors border border-transparent hover:border-red-900/50"
+					onclick={() => {
+						if (
+							confirm('ARE YOU SURE? This will wipe the current game state and restart at 00:00.')
+						) {
+							game.resetGame();
+						}
+					}}
+				>
+					⚠ RESET CAMPAIGN
+				</button>
+			</div>
 		</div>
 	</div>
 
