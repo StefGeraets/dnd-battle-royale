@@ -1,5 +1,51 @@
 {
 	"files.associations": {
 		"*.css": "tailwindcss"
+	},
+	"workbench.editor.labelFormat": "default",
+	"workbench.editor.customLabels.enabled": true,
+	"workbench.editor.customLabels.patterns": {
+		"**/src/**/*.css": "${filename}",
+		"**/src/**/utils/**/*.{js,ts}": "${filename} ⚙️",
+		"**/src/**/*.d.ts": "${filename} <T>",
+		"**/src/**/*.{js,ts}": "${filename}",
+		/** SVELTE */
+		"**/src/**/*.svelte": "${filename}",
+		"**/src/stores/**/*.{js,ts}": "${filename} (Store)",
+		/** SVELTEKIT */
+		// -- Home route needs special treatment
+		"**/src/routes/+page.svelte": "Home (Page)",
+		"**/src/routes/+page.{mdsvex,mdx}": "Home (MDX)",
+		"**/src/routes/+layout.svelte": "Layout (Root)",
+		// -- capture Home in grouped layouts
+		"**/src/routes/(**)/+page.svelte": "Home (Page)",
+		"**/src/routes/(**)/+page.{mdsvex,mdx}": "Home (MDX)",
+		// -- rest: require at least 1 dir with /*/**/, otherwise glob beats Home
+		"**/src/routes/*/**/+page.svelte": "${dirname} (Page)",
+		"**/src/routes/*/**/+page.{mdsvex,mdx}": "${dirname} (MDX)",
+		"**/src/routes/**/[[]*[]]/+page.svelte": "${dirname} (Route)",
+		// Layouts
+		"**/src/routes/*/**/+layout.svelte": "${dirname} (Layout)",
+		"**/src/routes/**/+layout.{js,ts}": "${dirname} (LayoutLoad)",
+		"**/src/routes/**/+layout.server.{js,ts}": "${dirname} (LayoutServerLoad)",
+		// Rest
+		"**/src/routes/**/+error.svelte": "${dirname} (Error Page)",
+		"**/src/routes/**/+page.{js,ts}": "${dirname} (Load)",
+		"**/src/routes/**/+page.server.{js,ts}": "${dirname} (ServerLoad)",
+		"**/src/routes/**/+server.{js,ts}": "${dirname} (Endpoint)",
+		"**/src/routes/**/*.remote.{js,ts}": "${filename} (Remote)",
+		"**/src/lib/server/*.{js,ts}": "${filename} (🔒)",
+		"**/src/hooks.{js,ts}": "Hooks",
+		"**/src/hooks.client.{js,ts}": "Hooks (Client)",
+		"**/src/hooks.server.{js,ts}": "Hooks (Server)",
+		/** ASTRO */
+		"**/src/layouts/**/*.astro": "${filename} (Layout)",
+		"**/src/**/*.astro": "${filename}",
+		"**/src/pages/index.astro": "Home (Page)",
+		"**/src/pages/**/[[]...slug[]].astro": "${dirname} (Slug)",
+		"**/src/pages/*/**/*.astro": "${dirname}/${filename} (Page)",
+		"**/src/content/**/*.md": "${dirname}/${filename}",
+		/** STORYBOOK */
+		"**/src/stories/**/*.*": "${filename} (Story)"
 	}
 }
