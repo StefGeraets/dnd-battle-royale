@@ -1,5 +1,6 @@
 import { browser } from "$app/environment";
 import { GAME_SCHEDULE } from "./game.config";
+import { getAverageColor } from "./utils/color";
 
 export type Point = {x: number; y: number };
 export type Zone = { x: number; y: number; r: number };
@@ -31,6 +32,10 @@ export class GameEngine {
 
   schedule = GAME_SCHEDULE;
   nextRoundIndex = $state(0);
+
+  // Visual config
+  mapImage = $state('/battleRoyale.jpg');
+  themeColor = $state('#0f172a');
 
   // COMPUTED VALUES
   // Rendered zone
@@ -123,6 +128,28 @@ export class GameEngine {
     }
   }
 
+  // Visual actions
+  setMapImage(url: string) {
+    if (!this.#isDm) return;
+    this.mapImage = url;
+
+    getAverageColor(url).then(color => {
+      this.themeColor = color;
+      this.#broadcast();
+      this.#saveState();
+    });
+
+    this.#broadcast();
+    this.#saveState();
+  }
+
+  setThemeColor(color: string) {
+    if (!this.#isDm) return;
+    this.themeColor = color;
+    this.#broadcast();
+    this.#saveState();
+  }
+
   #broadcast() {
     // We send the raw state, not the derived values. 
     // Presenter calculates derived values locally.
@@ -133,6 +160,8 @@ export class GameEngine {
         shrinkStartTime: this.shrinkStartTime,
         shrinkDuration: this.shrinkDuration,
         nextRoundIndex: this.nextRoundIndex,
+        mapImage: this.mapImage,
+        themeColor: this.themeColor,
         
         playerPos: $state.snapshot(this.playerPos),
         activeZone: $state.snapshot(this.activeZone),
@@ -155,6 +184,8 @@ export class GameEngine {
       shrinkStartTime: this.shrinkStartTime,
       shrinkDuration: this.shrinkDuration,
       nextRoundIndex: this.nextRoundIndex,
+      mapImage: this.mapImage,
+      themeColor: this.themeColor,
       timestamp: Date.now()
     }
 
@@ -180,6 +211,8 @@ export class GameEngine {
       this.shrinkStartTime = data.shrinkStartTime;
       this.shrinkDuration = data.shrinkDuration;
       this.nextRoundIndex = data.nextRoundIndex;
+      this.mapImage = data.mapImage || this.mapImage;
+      this.themeColor = data.themeColor || this.themeColor;
       
       // Note: We do NOT restore 'isRunning'. 
       // It is safer to start PAUSED after a reload so the DM can get their bearings.
@@ -276,6 +309,8 @@ export class GameEngine {
       this.shrinkStartTime = d.shrinkStartTime;
       this.shrinkDuration = d.shrinkDuration;
       this.nextRoundIndex = d.nextRoundIndex;
+      this.mapImage = d.mapImage;
+      this.themeColor = d.themeColor; 
       
       this.playerPos = d.playerPos;
       this.activeZone = d.activeZone;

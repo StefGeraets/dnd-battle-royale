@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { GameEngine } from '$lib/game.svelte';
 	import MapCanvas from '$lib/components/MapCanvas.svelte';
+	import MapSettings from '$lib/components/MapSettings.svelte';
 
 	const game = new GameEngine(true);
 
@@ -35,7 +36,10 @@
 
 <svelte:window onkeydown={handleKeyDown} />
 
-<div class="flex h-screen bg-zinc-950 text-white p-4 gap-4">
+<div
+	class="flex h-screen text-white p-4 gap-4 transition-colors duration-1000"
+	style="background-color: {game.themeColor}"
+>
 	<div class="w-80 flex flex-col gap-4 overflow-y-auto">
 		<h1 class="border-b border-red-900 pb-2 text-2xl font-bold text-red-500">DM Control</h1>
 
@@ -131,6 +135,8 @@
 				<div class="text-center text-green-500 font-bold">ALL ROUND COMPLETE</div>
 			{/if}
 		</div>
+
+		<MapSettings {game} />
 
 		<div class="p-2 border-t border-zinc-800">
 			<details class="text-xs text-zinc-500">

@@ -9,14 +9,14 @@ export type RoundConfig = {
 export const GAME_SCHEDULE: RoundConfig[] = [
 	{
 		id: 1,
-		triggerTime: 30, // At 30:00
+		triggerTime: 1, // At 30:00
 		radius: 35, // Shrink to 35%
 		duration: 30, // Take 30s to move
 		label: 'Round 1: First Contraction'
 	},
 	{
 		id: 2,
-		triggerTime: 60, // At 1:00:00
+		triggerTime: 2, // At 1:00:00
 		radius: 20,
 		duration: 60,
 		label: 'Round 2: Tightening the Noose'

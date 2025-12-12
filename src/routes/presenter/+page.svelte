@@ -6,6 +6,9 @@
 	const game = new GameEngine(false);
 </script>
 
-<div class="h-screen w-screen bg-black flex items-center justify-center overflow-hidden">
+<div
+	class="h-screen w-screen flex items-center justify-center overflow-hidden transition-colors duration-1000"
+	style="background-color: {game.themeColor}"
+>
 	<MapCanvas {game} isDm={false} />
 </div>
