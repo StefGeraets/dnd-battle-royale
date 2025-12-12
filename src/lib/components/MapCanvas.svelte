@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { GRID_ROWS, GRID_COLS, GameEngine } from '$lib/game.svelte';
 	import { onMount } from 'svelte';
+	import { GameEngine } from '$lib/game.svelte';
+	import { GRID_SIZE } from '../game.config';
 
 	type Props = {
 		game: GameEngine;
@@ -9,12 +10,9 @@
 
 	let { game, isDm = false }: Props = $props();
 
+	// We track the Image's position on screen to align the SVG
 	let mapImageEl: HTMLImageElement;
-	let metrics = $state({ x: 0, y: 0, w: 1, h: 1 });
-
-	// Calculate cell dimensions
-	const CELL_WIDTH = 100 / GRID_COLS;
-	const CELL_HEIGHT = 100 / GRID_ROWS;
+	let metrics = $state({ x: 0, y: 0, s: 1 }); // Default to 1 to avoid div/0
 
 	function updateMetrics() {
 		if (mapImageEl) {
@@ -22,17 +20,20 @@
 			metrics = {
 				x: rect.left,
 				y: rect.top,
-				w: rect.width,
-				h: rect.height
+				s: rect.width
 			};
 		}
 	}
 
 	onMount(() => {
+		// Calculate on load and resize
 		updateMetrics();
 		window.addEventListener('resize', updateMetrics);
 		return () => window.removeEventListener('resize', updateMetrics);
 	});
+
+	// Constants
+	const CELL_SIZE = 100 / GRID_SIZE;
 
 	function handleMapClick(e: MouseEvent) {
 		if (!isDm) return;
@@ -42,26 +43,26 @@
 		const relY = e.clientY - metrics.y;
 
 		// 2. Convert to 0-100 scale
-		const scaleX = (relX / metrics.w) * 100;
-		const scaleY = (relY / metrics.h) * 100;
+		const scaleX = (relX / metrics.s) * 100;
+		const scaleY = (relY / metrics.s) * 100;
 
 		// 3. Ignore clicks outside the actual map image area
 		if (scaleX < 0 || scaleX > 100 || scaleY < 0 || scaleY > 100) return;
 
 		// 4. Snap to Grid
-		const cellX = Math.floor(scaleX / CELL_WIDTH) * CELL_WIDTH + CELL_WIDTH / 2;
-		const cellY = Math.floor(scaleY / CELL_HEIGHT) * CELL_HEIGHT + CELL_HEIGHT / 2;
+		const cellX = Math.floor(scaleX / CELL_SIZE) * CELL_SIZE + CELL_SIZE / 2;
+		const cellY = Math.floor(scaleY / CELL_SIZE) * CELL_SIZE + CELL_SIZE / 2;
 
 		game.setNextZoneCenter(cellX, cellY);
 	}
 </script>
 
-<div class="relative flex items-center justify-center w-full h-full overflow-hidden bg-zinc-950">
+<div class="relative flex h-full w-full items-center justify-center overflow-hidden">
 	<img
 		bind:this={mapImageEl}
 		src={game.mapImage}
 		alt="Battle Map"
-		class="max-h-screen max-w-full object-contain shadow-2xl transition-opacity duration-500"
+		class="max-h-screen max-w-full shadow-2xl transition-opacity duration-500 aspect-square object-cover"
 		style="opacity: 0.8;"
 		onload={updateMetrics}
 	/>
@@ -80,10 +81,7 @@
 				<feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" result="noise" />
 				<feColorMatrix
 					type="matrix"
-					values="1 0 0 0 0  
-									0 0 0 0 0  
-									0 0 0 0 0  
-									0 0 0 0.4 0"
+					values="1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.4 0"
 					in="noise"
 					result="coloredNoise"
 				/>
@@ -96,15 +94,15 @@
 			</radialGradient>
 
 			<filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-				<feGaussianBlur stdDeviation="0.5" result="blur" />
+				<feGaussianBlur stdDeviation="2" result="blur" />
 				<feComposite in="SourceGraphic" in2="blur" operator="over" />
 			</filter>
 
 			<mask id="fsStormMask">
-				<rect x="0" y="0" width="100" height="100" fill="white" />
+				<rect x="0" y="0" width="100%" height="100%" fill="white" />
 
 				<g transform="translate({metrics.x}, {metrics.y})">
-					<g transform="scale({metrics.w / 100}, {metrics.h / 100})">
+					<g transform="scale({metrics.s / 100})">
 						<circle
 							cx={game.currentZone.x}
 							cy={game.currentZone.y}
@@ -126,24 +124,23 @@
 			filter="url(#storm-fog)"
 			class="opacity-90"
 		/>
-
 		<rect
 			x="0"
 			y="0"
 			width="100%"
 			height="100%"
-			fill="#330000"
-			fill-opacity="0.4"
+			fill="#200000"
+			fill-opacity="0.5"
 			mask="url(#fsStormMask)"
 		/>
 
-		<g transform="translate({metrics.x}, {metrics.y}) scale({metrics.w / 100}, {metrics.h / 100})">
+		<g transform="translate({metrics.x}, {metrics.y}) scale({metrics.s / 100})">
 			<g stroke="white" stroke-opacity="0.15" stroke-width="0.1">
-				{#each Array(GRID_COLS) as _, i}
-					<line x1={i * CELL_WIDTH} y1="0" x2={i * CELL_WIDTH} y2="100" />
+				{#each Array(GRID_SIZE) as _, i}
+					<line x1={i * CELL_SIZE} y1="0" x2={i * CELL_SIZE} y2="100" />
 				{/each}
-				{#each Array(GRID_ROWS) as _, i}
-					<line x1="0" y1={i * CELL_HEIGHT} x2="100" y2={i * CELL_HEIGHT} />
+				{#each Array(GRID_SIZE) as _, i}
+					<line x1="0" y1={i * CELL_SIZE} x2="100" y2={i * CELL_SIZE} />
 				{/each}
 			</g>
 
@@ -155,9 +152,9 @@
 						r={game.targetZone.r}
 						fill="none"
 						stroke={game.phase === 'SHRINKING' ? '#ff4444' : '#fbbf24'}
-						stroke-width={game.phase === 'WARNING' ? '0.6' : '0.3'}
+						stroke-width="0.3"
 						stroke-dasharray="2 1"
-						class="opacity-80 drop-shadow-md"
+						class="opacity-80"
 					/>
 				</g>
 				{#if isDm}
@@ -173,34 +170,22 @@
 				stroke="#ff3333"
 				stroke-width="0.5"
 				filter="url(#glow)"
-				class="transition-all duration-75 ease-linear"
 			/>
 
 			<g
 				transform="translate(
-				{game.playerPos.x * CELL_WIDTH + CELL_WIDTH / 2}, 
-				{game.playerPos.y * CELL_HEIGHT + CELL_HEIGHT / 2}
-			)"
-				class="transition-all duration-200 ease-out"
+                {game.playerPos.x * CELL_SIZE + CELL_SIZE / 2}, 
+                {game.playerPos.y * CELL_SIZE + CELL_SIZE / 2}
+            )"
 			>
-				<circle r={Math.min(CELL_WIDTH, CELL_HEIGHT) * 0.35} fill="black" opacity="0.5" cy="0.5" />
-
+				<circle r={Math.min(CELL_SIZE, CELL_SIZE) * 0.35} fill="black" opacity="0.5" cy="0.5" />
 				<circle
-					r={Math.min(CELL_WIDTH, CELL_HEIGHT) * 0.35}
+					r={Math.min(CELL_SIZE, CELL_SIZE) * 0.35}
 					fill="#3b82f6"
 					stroke="white"
 					stroke-width="0.5"
 				/>
-				<text
-					y={Math.min(CELL_WIDTH, CELL_HEIGHT) * 0.15}
-					font-size="2.5"
-					text-anchor="middle"
-					fill="white"
-					font-weight="900"
-					style="text-shadow: 0px 1px 2px rgba(0,0,0,0.8); font-family: sans-serif;"
-				>
-					P
-				</text>
+				<text y="1" font-size="2.5" text-anchor="middle" fill="white" font-weight="900">P</text>
 			</g>
 		</g>
 	</svg>
@@ -210,14 +195,13 @@
 	.animate-pulse {
 		animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 	}
-
 	@keyframes pulse {
 		0%,
 		100% {
 			opacity: 1;
 		}
 		50% {
-			opacity: 0.4;
+			opacity: 0.2;
 		}
 	}
 </style>

@@ -9,7 +9,6 @@
 	function handleKeyDown(e: KeyboardEvent) {
 		const step = 1;
 
-		console.log(e);
 		switch (e.code) {
 			case 'ArrowUp':
 				game.movePlayer(0, -step);
@@ -41,10 +40,10 @@
 <svelte:window onkeydown={handleKeyDown} />
 
 <div
-	class="flex h-screen text-white p-4 gap-4 transition-colors duration-1000"
+	class="flex h-screen text-white gap-4 transition-colors duration-1000"
 	style="background-color: {game.themeColor}"
 >
-	<div class="w-80 flex flex-col gap-4 overflow-y-auto">
+	<div class="relative z-50 w-80 flex flex-col p-4 gap-4 overflow-y-auto">
 		<h1 class="border-b border-red-900 pb-2 text-2xl font-bold text-red-500">DM Control</h1>
 
 		<div class="bg-zinc-900 p-4 rounded border border-zinc-700 shadow-lg">
@@ -172,7 +171,7 @@
 		</div>
 	</div>
 
-	<div class="flex-1 flex items-center justify-center bg-black/20 rounded-xl">
+	<div class="flex-1 flex items-center justify-center rounded-xl shadow-inner">
 		<MapCanvas {game} isDm={true} />
 	</div>
 </div>

@@ -1,5 +1,5 @@
 import { browser } from "$app/environment";
-import { GAME_SCHEDULE } from "./game.config";
+import { GAME_SCHEDULE, GRID_SIZE } from "./game.config";
 import { getAverageColor } from "./utils/color";
 
 export type Point = {x: number; y: number };
@@ -8,8 +8,6 @@ export type GamePhase = 'IDLE' | 'WARNING' | 'SHRINKING' | 'STABLE';
 
 const SYNC_CHANNEL = 'dnd_royale_sync';
 const SAVE_KEY = 'dnd_royale_save_v1';
-export const GRID_ROWS = 20;
-export const GRID_COLS = 20;
 
 export class GameEngine {
   // REACTIVE STATE //
@@ -35,7 +33,7 @@ export class GameEngine {
 
   // Visual config
   mapImage = $state('/battleRoyale.jpg');
-  themeColor = $state('#0f172a');
+  themeColor = $state('#3C5D68');
 
   // COMPUTED VALUES
   // Rendered zone
@@ -238,8 +236,8 @@ export class GameEngine {
     const newX = this.playerPos.x + dx;
     const newY = this.playerPos.y + dy;
 
-    if (newX >= 0 && newX < GRID_COLS) this.playerPos.x = newX;
-    if (newY >= 0 && newY < GRID_ROWS) this.playerPos.y = newY;
+    if (newX >= 0 && newX < GRID_SIZE) this.playerPos.x = newX;
+    if (newY >= 0 && newY < GRID_SIZE) this.playerPos.y = newY;
     
     if (!this.isRunning) {
       this.#broadcast(); // Manually update if paused
