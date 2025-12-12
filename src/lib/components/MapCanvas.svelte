@@ -6,9 +6,10 @@
 	type Props = {
 		game: GameEngine;
 		isDm?: boolean;
+		mode: 'ZONE' | 'CHEST';
 	};
 
-	let { game, isDm = false }: Props = $props();
+	let { game, isDm = false, mode = 'ZONE' }: Props = $props();
 
 	// We track the Image's position on screen to align the SVG
 	let mapImageEl: HTMLImageElement;
@@ -49,11 +50,17 @@
 		// 3. Ignore clicks outside the actual map image area
 		if (scaleX < 0 || scaleX > 100 || scaleY < 0 || scaleY > 100) return;
 
-		// 4. Snap to Grid
-		const cellX = Math.floor(scaleX / CELL_SIZE) * CELL_SIZE + CELL_SIZE / 2;
-		const cellY = Math.floor(scaleY / CELL_SIZE) * CELL_SIZE + CELL_SIZE / 2;
+		const gridX = Math.floor(scaleX / CELL_SIZE);
+		const gridY = Math.floor(scaleY / CELL_SIZE);
 
-		game.setNextZoneCenter(cellX, cellY);
+		if (mode === 'CHEST') {
+			game.addChest(gridX, gridY);
+		} else {
+			// Zone mode
+			const centerX = gridX * CELL_SIZE + CELL_SIZE / 2;
+			const centerY = gridY * CELL_SIZE + CELL_SIZE / 2;
+			game.setNextZoneCenter(centerX, centerY);
+		}
 	}
 </script>
 
@@ -135,14 +142,49 @@
 		/>
 
 		<g transform="translate({metrics.x}, {metrics.y}) scale({metrics.s / 100})">
+			<!-- grid lines -->
 			<g stroke="white" stroke-opacity="0.15" stroke-width="0.1">
-				{#each Array(GRID_SIZE) as _, i}
+				{#each Array(GRID_SIZE + 1) as _, i}
 					<line x1={i * CELL_SIZE} y1="0" x2={i * CELL_SIZE} y2="100" />
 				{/each}
-				{#each Array(GRID_SIZE) as _, i}
+				{#each Array(GRID_SIZE + 1) as _, i}
 					<line x1="0" y1={i * CELL_SIZE} x2="100" y2={i * CELL_SIZE} />
 				{/each}
 			</g>
+
+			<!-- special areas -->
+			{#each game.specialAreas as area}
+				<g transform="translate({area.x * CELL_SIZE}, {area.y * CELL_SIZE})" class="outline-0">
+					<!-- role="button"
+					tabindex="0"
+					onclick={(e) => {
+						e.stopPropagation();
+						game.toggleChest(area.id);
+					}}
+					onkeypress={() => {}} -->
+					<rect
+						width={CELL_SIZE * 2}
+						height={CELL_SIZE * 2}
+						fill={area.collected ? 'black' : '#facc15'}
+						fill-opacity="0.02"
+						stroke={area.collected ? 'black' : '#facc15'}
+						stroke-width="0.2"
+					/>
+					<text
+						x={CELL_SIZE}
+						y="-1.25"
+						text-anchor="middle"
+						dominant-baseline="middle"
+						font-size="1.5"
+						font-weight="bold"
+						fill="white"
+						stroke="black"
+						stroke-width="0.05"
+					>
+						{area.name}
+					</text>
+				</g>
+			{/each}
 
 			{#if isDm || game.phase === 'WARNING' || game.phase === 'SHRINKING'}
 				<g class={game.phase === 'WARNING' ? 'animate-pulse' : ''}>
