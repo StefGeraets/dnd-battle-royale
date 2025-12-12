@@ -18,21 +18,21 @@ export const GAME_SCHEDULE: RoundConfig[] = [
 		id: 2,
 		triggerTime: 2, // At 1:00:00
 		radius: 20,
-		duration: 60,
+		duration: 30,
 		label: 'Round 2: Tightening the Noose'
 	},
 	{
 		id: 3,
-		triggerTime: 90,
+		triggerTime: 3,
 		radius: 10,
-		duration: 60,
+		duration: 30,
 		label: 'Round 3: Sudden Death'
 	},
 	{
 		id: 4,
-		triggerTime: 120,
+		triggerTime: 4,
 		radius: 0, // Closes completely
-		duration: 120,
+		duration: 60,
 		label: 'Round 4: Game Over'
 	}
 ];

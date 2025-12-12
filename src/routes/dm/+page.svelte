@@ -9,7 +9,8 @@
 	function handleKeyDown(e: KeyboardEvent) {
 		const step = 1;
 
-		switch (e.key) {
+		console.log(e);
+		switch (e.code) {
 			case 'ArrowUp':
 				game.movePlayer(0, -step);
 				break;
@@ -21,6 +22,9 @@
 				break;
 			case 'ArrowRight':
 				game.movePlayer(step, 0);
+				break;
+			case 'Space':
+				game.toggleTimer();
 				break;
 		}
 	}

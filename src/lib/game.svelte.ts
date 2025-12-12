@@ -22,8 +22,8 @@ export class GameEngine {
   playerPos = $state<Point>({x: 1, y: 1});
 
   // Zone
-  activeZone = $state<Zone>({x: 50, y: 50, r: 50});
-  targetZone = $state<Zone>({x: 50, y: 50, r: 50});
+  activeZone = $state<Zone>({x: 50, y: 50, r: 150});
+  targetZone = $state<Zone>({x: 50, y: 50, r: 150});
 
   // Animation/Phase state
   phase = $state<GamePhase>('IDLE');
