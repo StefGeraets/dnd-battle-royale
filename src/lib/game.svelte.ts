@@ -1,5 +1,5 @@
 import { browser } from "$app/environment";
-import { GAME_SCHEDULE, GRID_SIZE } from "./game.config";
+import { generateSchedule, GRID_SIZE } from "./game.config";
 import { getAverageColor } from "./utils/color";
 
 export type Point = {x: number; y: number };
@@ -29,14 +29,15 @@ export class GameEngine {
   shrinkStartTime = $state(0);
   shrinkDuration = $state(30000);
 
-  schedule = GAME_SCHEDULE;
+  totalGameHours = $state(2.5);
+  isPresenterHidden = $state(true);
+  schedule = $state(generateSchedule(2.5));
   nextRoundIndex = $state(0);
-
-  specialAreas = $state<SpecialArea[]>([]);
 
   // Visual config
   mapImage = $state('/battleRoyale.jpg');
   themeColor = $state('#3C5D68');
+  specialAreas = $state<SpecialArea[]>([]);
 
   // COMPUTED VALUES
   distanceOutside = $derived.by(() => {
@@ -174,6 +175,22 @@ export class GameEngine {
     this.#broadcast();
   }
 
+  setTotalTime(hours: number) {
+    if (!this.#isDm) return;
+    this.totalGameHours = hours;
+    this.schedule = generateSchedule(hours);
+
+    this.#saveState();
+    this.#broadcast();
+  }
+
+  togglePresenterCurtain() {
+    if (!this.#isDm) return;
+    this.isPresenterHidden = !this.isPresenterHidden;
+    this.#saveState();
+    this.#broadcast();
+  }
+
   addChest(gridX: number, gridY: number) {
     if (!this.#isDm) return;
 
@@ -265,6 +282,9 @@ export class GameEngine {
         nextRoundIndex: this.nextRoundIndex,
         mapImage: this.mapImage,
         themeColor: this.themeColor,
+        totalGameHours: this.totalGameHours,
+        isPresenterHidden: this.isPresenterHidden,
+        schedule: $state.snapshot(this.schedule),
         specialAreas: $state.snapshot(this.specialAreas),
         playerPos: $state.snapshot(this.playerPos),
         activeZone: $state.snapshot(this.activeZone),
@@ -285,6 +305,9 @@ export class GameEngine {
       targetZone: this.targetZone,
       specialAreas: this.specialAreas,
       phase: this.phase,
+      totalGameHours: this.totalGameHours,
+      isPresenterHidden: this.isPresenterHidden,
+      schedule: this.schedule,
       shrinkStartTime: this.shrinkStartTime,
       shrinkDuration: this.shrinkDuration,
       nextRoundIndex: this.nextRoundIndex,
@@ -315,6 +338,9 @@ export class GameEngine {
       this.shrinkStartTime = data.shrinkStartTime;
       this.shrinkDuration = data.shrinkDuration;
       this.nextRoundIndex = data.nextRoundIndex;
+      this.totalGameHours = data.totalGameHours || 2.5;
+      this.isPresenterHidden = data.isPresenterHidden || true;
+      this.schedule = data.schedule || generateSchedule(this.totalGameHours);
       this.mapImage = data.mapImage || this.mapImage;
       this.themeColor = data.themeColor || this.themeColor;
       this.specialAreas = data.specialAreas || [];
@@ -347,6 +373,9 @@ export class GameEngine {
       this.mapImage = d.mapImage;
       this.themeColor = d.themeColor; 
       this.specialAreas = d.specialAreas || [];
+      this.totalGameHours = d.totalGameHours;
+      this.isPresenterHidden = d.isPresenterHidden;
+      this.schedule = d.schedule;
       this.playerPos = d.playerPos;
       this.activeZone = d.activeZone;
       this.targetZone = d.targetZone;

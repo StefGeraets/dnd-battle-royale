@@ -6,7 +6,7 @@
 	type Props = {
 		game: GameEngine;
 		isDm?: boolean;
-		mode: 'ZONE' | 'CHEST';
+		mode?: 'ZONE' | 'CHEST';
 	};
 
 	let { game, isDm = false, mode = 'ZONE' }: Props = $props();
@@ -202,6 +202,15 @@
 				{#if isDm}
 					<circle cx={game.targetZone.x} cy={game.targetZone.y} r="0.6" fill="#fbbf24" />
 				{/if}
+			{/if}
+
+			{#if isDm && game.isPresenterHidden}
+				<g transform="translate(2, 5)">
+					<rect width="20" height="6" rx="1" fill="red" opacity="0.8" />
+					<text x="10" y="4" font-size="3" text-anchor="middle" fill="white" font-weight="bold"
+						>HIDDEN</text
+					>
+				</g>
 			{/if}
 
 			<circle

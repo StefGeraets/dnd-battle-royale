@@ -7,6 +7,7 @@
 	const game = new GameEngine(true);
 
 	let mode = $state<'ZONE' | 'CHEST'>('ZONE');
+	let showSetup = $state(true);
 	let lastPlayedIndex = -1;
 
 	// Player movement
@@ -63,6 +64,68 @@
 	<div class="flex flex-1 gap-4 p-4 overflow-hidden">
 		<div class="relative z-50 w-80 flex flex-col gap-4 overflow-y-auto">
 			<h1 class="border-b border-red-900 pb-2 text-2xl font-bold text-red-500">DM Control</h1>
+			<button
+				onclick={() => (showSetup = !showSetup)}
+				class="text-xs text-zinc-400 hover:text-white"
+			>
+				{showSetup ? 'Hide Setup' : 'Show Setup'}
+			</button>
+
+			{#if showSetup}
+				<div class="rounded border border-zinc-700/50 bg-zinc-900 p-4 shadow-lg">
+					<h2 class="mb-3 text-xs font-bold uppercase text-yellow-500">Game Setup</h2>
+
+					<div class="mb-4">
+						<label for="gameHours" class="block text-xs text-zinc-400 mb-1"
+							>Total Game Duration (Hours)</label
+						>
+						<div class="flex gap-2">
+							<input
+								name="gameHours"
+								type="number"
+								step="0.5"
+								min="0.5"
+								max="12"
+								value={game.totalGameHours}
+								onchange={(e) => game.setTotalTime(+e.currentTarget.value)}
+								class="w-20 rounded bg-zinc-800 p-1 text-sm text-white border border-zinc-600"
+							/>
+							<div class="text-xs flex items-center text-zinc-500">
+								(Ends at {Math.floor(game.totalGameHours * 60)} mins)
+							</div>
+						</div>
+					</div>
+
+					<div class="mb-4">
+						<!-- svelte-ignore a11y_label_has_associated_control -->
+						<label class="block text-xs text-zinc-400 mb-1">Presenter Screen</label>
+						<button
+							class="w-full py-2 px-3 rounded text-sm font-bold transition-colors {game.isPresenterHidden
+								? 'bg-red-600 text-white hover:bg-red-500'
+								: 'bg-green-600 text-white hover:bg-green-500'}"
+							onclick={() => game.togglePresenterCurtain()}
+						>
+							{game.isPresenterHidden ? '👁 REVEAL MAP' : '🙈 HIDE MAP'}
+						</button>
+						<p class="text-[10px] text-zinc-500 mt-1">
+							{game.isPresenterHidden
+								? 'Players see "Game Begins Soon" screen.'
+								: 'Players can see the map.'}
+						</p>
+					</div>
+
+					<div>
+						<!-- svelte-ignore a11y_label_has_associated_control -->
+						<label class="block text-xs text-zinc-400 mb-1">Preparation</label>
+						<button
+							class="w-full py-2 px-3 rounded text-sm font-bold bg-zinc-700 hover:bg-zinc-600 text-zinc-200"
+							onclick={() => (mode = 'CHEST')}
+						>
+							🎁 Place Chests
+						</button>
+					</div>
+				</div>
+			{/if}
 
 			{#if game.distanceOutside > 0}
 				<div

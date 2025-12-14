@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { GAME_SCHEDULE } from '../game.config';
 	import type { GameEngine } from '../game.svelte';
 
 	type Props = {
@@ -8,8 +7,9 @@
 
 	let { game }: Props = $props();
 
-	const lastEvent = GAME_SCHEDULE[GAME_SCHEDULE.length - 1];
-	const totalDurationMs = lastEvent ? (lastEvent.triggerTime + 10) * 60 * 1000 : 60000;
+	let schedule = $derived(game.schedule);
+	let lastEvent = $derived(schedule.length > 0 ? schedule[schedule.length - 1] : null);
+	let totalDurationMs = $derived(lastEvent ? (lastEvent.triggerTime + 10) * 60 * 1000 : 60000);
 
 	function getPct(ms: number) {
 		return Math.min(100, (ms / totalDurationMs) * 100);
@@ -21,7 +21,7 @@
 >
 	<div class="absolute inset-0 top-8 h-1 w-full bg-zinc-700"></div>
 
-	{#each GAME_SCHEDULE as round}
+	{#each schedule as round}
 		{@const startMs = round.triggerTime * 60 * 1000}
 		{@const durationMs = round.duration * 1000}
 
