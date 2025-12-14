@@ -7,9 +7,15 @@
 		game: GameEngine;
 		isDm?: boolean;
 		mode?: 'ZONE' | 'CHEST';
+		onSelectChest?: (id: string | null) => void;
 	};
 
-	let { game, isDm = false, mode = 'ZONE' }: Props = $props();
+	let {
+		game,
+		isDm = false,
+		mode = 'ZONE',
+		onSelectChest = (id: string | null) => {}
+	}: Props = $props();
 
 	// We track the Image's position on screen to align the SVG
 	let mapImageEl: HTMLImageElement;
@@ -43,6 +49,8 @@
 		const relX = e.clientX - metrics.x;
 		const relY = e.clientY - metrics.y;
 
+		const rect = (e.currentTarget as SVGSVGElement)?.getBoundingClientRect();
+
 		// 2. Convert to 0-100 scale
 		const scaleX = (relX / metrics.s) * 100;
 		const scaleY = (relY / metrics.s) * 100;
@@ -54,7 +62,19 @@
 		const gridY = Math.floor(scaleY / CELL_SIZE);
 
 		if (mode === 'CHEST') {
-			game.addChest(gridX, gridY);
+			// 1. Check if we clicked ON an existing chest
+			const clickedChest = game.specialAreas.find((c) => {
+				// Chest covers x, x+1 and y, y+1
+				return gridX >= c.x && gridX <= c.x + 1 && gridY >= c.y && gridY <= c.y + 1;
+			});
+
+			if (clickedChest) {
+				onSelectChest(clickedChest.id);
+			} else {
+				game.addChest(gridX, gridY);
+				// Also clear selection if we place a new one
+				onSelectChest(null);
+			}
 		} else {
 			// Zone mode
 			const centerX = gridX * CELL_SIZE + CELL_SIZE / 2;
@@ -155,20 +175,14 @@
 			<!-- special areas -->
 			{#each game.specialAreas as area}
 				<g transform="translate({area.x * CELL_SIZE}, {area.y * CELL_SIZE})" class="outline-0">
-					<!-- role="button"
-					tabindex="0"
-					onclick={(e) => {
-						e.stopPropagation();
-						game.toggleChest(area.id);
-					}}
-					onkeypress={() => {}} -->
 					<rect
 						width={CELL_SIZE * 2}
 						height={CELL_SIZE * 2}
-						fill={area.collected ? 'black' : '#facc15'}
+						fill="#facc15"
 						fill-opacity="0.02"
-						stroke={area.collected ? 'black' : '#facc15'}
+						stroke="#facc15"
 						stroke-width="0.2"
+						stroke-dasharray="1 0.5"
 					/>
 					<text
 						x={CELL_SIZE}
@@ -181,7 +195,7 @@
 						stroke="black"
 						stroke-width="0.05"
 					>
-						{area.name}
+						{isDm ? area.name : '?'}
 					</text>
 				</g>
 			{/each}

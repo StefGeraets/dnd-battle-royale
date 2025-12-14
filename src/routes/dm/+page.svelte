@@ -9,6 +9,17 @@
 	let mode = $state<'ZONE' | 'CHEST'>('ZONE');
 	let showSetup = $state(true);
 	let lastPlayedIndex = -1;
+	let volume = $state(0.5);
+	let selectedChestId = $state<string | null>(null);
+
+	let selectedChest = $derived(
+		selectedChestId ? game.specialAreas.find((c) => c.id === selectedChestId) : null
+	);
+
+	function selectChest(id: string | null) {
+		selectedChestId = id;
+		if (id) mode = 'CHEST';
+	}
 
 	// Player movement
 	function handleKeyDown(e: KeyboardEvent) {
@@ -50,7 +61,7 @@
 
 	function playSound() {
 		const audio = new Audio('/warhorn.mp3');
-		audio.volume = 0.35;
+		audio.volume = volume;
 		audio.play().catch((e) => console.warn('Audio blocked', e));
 	}
 </script>
@@ -86,6 +97,7 @@
 								step="0.5"
 								min="0.5"
 								max="12"
+								disabled={game.elapsedTime > 0}
 								value={game.totalGameHours}
 								onchange={(e) => game.setTotalTime(+e.currentTarget.value)}
 								class="w-20 rounded bg-zinc-800 p-1 text-sm text-white border border-zinc-600"
@@ -112,6 +124,27 @@
 								? 'Players see "Game Begins Soon" screen.'
 								: 'Players can see the map.'}
 						</p>
+					</div>
+
+					<div class="mb-4">
+						<label for="volume" class="block text-xs text-zinc-400 mb-1">Audio (Warhorn)</label>
+						<div class="flex items-center gap-2">
+							<button
+								class="px-2 py-1 bg-zinc-700 hover:bg-zinc-600 rounded text-xs"
+								onclick={playSound}
+							>
+								▶ Test
+							</button>
+							<input
+								name="volume"
+								type="range"
+								min="0"
+								max="1"
+								step="0.1"
+								bind:value={volume}
+								class="flex-1 h-1 bg-zinc-600 rounded-lg appearance-none cursor-pointer"
+							/>
+						</div>
 					</div>
 
 					<div>
@@ -258,6 +291,47 @@
 				{/if}
 			</div>
 
+			{#if selectedChest && mode === 'CHEST'}
+				<div
+					class="rounded border border-yellow-500 bg-yellow-900/40 p-4 shadow-lg animate-in fade-in slide-in-from-left-4"
+				>
+					<div class="flex justify-between items-start mb-2">
+						<h2 class="text-xs font-bold uppercase text-yellow-500">Edit Chest</h2>
+						<button
+							class="text-xs text-slate-400 hover:text-white"
+							onclick={() => (selectedChestId = null)}>✕</button
+						>
+					</div>
+
+					<label for="chestName" class="block text-xs text-slate-400 mb-1">Name / Loot</label>
+					<input
+						name="chestName"
+						type="text"
+						value={selectedChest.name}
+						oninput={(e) => game.renameChest(selectedChest.id, e.currentTarget.value)}
+						class="w-full rounded bg-slate-800 p-2 text-sm text-white border border-yellow-700/50 focus:border-yellow-500 outline-none mb-3"
+					/>
+
+					<div class="flex gap-2">
+						<button
+							class="flex-1 py-2 rounded text-xs font-bold bg-red-900/50 text-red-300 hover:bg-red-900 border border-red-900"
+							onclick={() => {
+								game.deleteChest(selectedChest.id);
+								selectedChestId = null;
+							}}
+						>
+							🗑 Delete Area
+						</button>
+						<button
+							class="flex-1 py-2 rounded text-xs font-bold bg-slate-700 hover:bg-slate-600"
+							onclick={() => (selectedChestId = null)}
+						>
+							Done
+						</button>
+					</div>
+				</div>
+			{/if}
+
 			<MapSettings {game} />
 
 			<div class="mt-auto">
@@ -277,7 +351,7 @@
 		</div>
 
 		<div class="flex-1 flex items-center justify-center rounded-xl shadow-inner">
-			<MapCanvas {game} isDm={true} {mode} />
+			<MapCanvas {game} isDm={true} {mode} onSelectChest={selectChest} />
 		</div>
 	</div>
 

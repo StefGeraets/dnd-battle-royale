@@ -4,7 +4,7 @@ import { getAverageColor } from "./utils/color";
 
 export type Point = {x: number; y: number };
 export type Zone = { x: number; y: number; r: number };
-export type SpecialArea = { id: string; x: number; y: number; collected: boolean; name: string };
+export type SpecialArea = { id: string; x: number; y: number; name: string };
 export type GamePhase = 'IDLE' | 'WARNING' | 'SHRINKING' | 'STABLE';
 
 const SYNC_CHANNEL = 'dnd_royale_sync';
@@ -191,16 +191,30 @@ export class GameEngine {
     this.#broadcast();
   }
 
+  // CHEST ACTIONS
   addChest(gridX: number, gridY: number) {
     if (!this.#isDm) return;
 
-    if (gridX + 1 >= GRID_SIZE || gridY + 1 >= GRID_SIZE) return;
+    if (gridX + 1 >= GRID_SIZE || gridY + 1 >= GRID_SIZE) {
+      console.warn('Chest out of bounds');
+      return
+    };
+
+    const hasOverlap = this.specialAreas.some(chest => {
+      const dx = Math.abs(chest.x - gridX);
+      const dy = Math.abs(chest.y - gridY);
+      return dx < 2 && dy < 2;
+    });
+
+    if (hasOverlap) {
+      console.warn('Chest overlap existing area');
+      return;
+    }
 
     this.specialAreas.push({
       id: crypto.randomUUID(),
       x: gridX,
       y: gridY,
-      collected: false,
       name: `Chest ${this.specialAreas.length + 1}`
     });
 
@@ -208,11 +222,18 @@ export class GameEngine {
     this.#broadcast();
   }
 
-  toggleChest(id: string) {
+  deleteChest(id: string) {
+    if (!this.#isDm) return;
+    this.specialAreas = this.specialAreas.filter((c) => c.id !== id);
+    this.#saveState();
+    this.#broadcast();
+  }
+
+  renameChest(id: string, newName: string) {
     if (!this.#isDm) return;
     const chest = this.specialAreas.find(c => c.id === id);
-    if(chest) {
-      chest.collected = !chest.collected;
+    if (chest) {
+      chest.name = newName;
       this.#saveState();
       this.#broadcast();
     }
