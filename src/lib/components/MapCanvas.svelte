@@ -195,7 +195,7 @@
 						stroke="black"
 						stroke-width="0.05"
 					>
-						{isDm ? area.name : '?'}
+						{area.name}
 					</text>
 				</g>
 			{/each}
@@ -219,7 +219,7 @@
 			{/if}
 
 			{#if isDm && game.isPresenterHidden}
-				<g transform="translate(2, 5)">
+				<g transform="translate(38, 85)">
 					<rect width="20" height="6" rx="1" fill="red" opacity="0.8" />
 					<text x="10" y="4" font-size="3" text-anchor="middle" fill="white" font-weight="bold"
 						>HIDDEN</text

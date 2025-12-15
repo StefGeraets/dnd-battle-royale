@@ -2,9 +2,10 @@ export const GRID_SIZE = 24;
 
 export type RoundConfig = {
 	id: number;
-	triggerTime: number;
+	triggerTime: number; // In Minutes
 	radius: number;
-	duration: number;
+	duration: number; // In Seconds
+  warningDuration: number; // In Seconds
 	label: string;
 };
 
@@ -18,35 +19,47 @@ export type RoundConfig = {
  */
 export function generateSchedule(totalHours: number): RoundConfig[] {
   const totalMinutes = totalHours * 60;
+  const totalSeconds = totalMinutes * 60;
 
-  return [
-    {
-      id: 1,
-      triggerTime: Math.floor(totalMinutes * 0.2), // At 30:00
-      radius: 35, // Shrink to 35%
-      duration: 15, // Take 30s to move
-      label: 'Round 1'
+  const config = [
+    { 
+        label: "Round 1: First Contraction", 
+        targetRadius: 35, 
+        triggerPct: 0.20,  // Happens at 20% of game
+        warningPct: 0.02,  // 8% warning (Long)
+        shrinkPct: 0.08    // 2% shrink duration (Slow)
     },
-    {
-      id: 2,
-      triggerTime: Math.floor(totalMinutes * 0.4), // At 1:00:00
-      radius: 20,
-      duration: 30,
-      label: 'Round 2'
+    { 
+        label: "Round 2: Tightening",        
+        targetRadius: 20, 
+        triggerPct: 0.45, 
+        warningPct: 0.015,  // 6% warning
+        shrinkPct: 0.06   // 1.5% shrink
     },
-    {
-      id: 3,
-      triggerTime: Math.floor(totalMinutes * 0.6),
-      radius: 10,
-      duration: 30,
-      label: 'Round 3'
+    { 
+        label: "Round 3: Sudden Death",      
+        targetRadius: 10, 
+        triggerPct: 0.70, 
+        warningPct: 0.01,  // 4% warning
+        shrinkPct: 0.04    // 1% shrink
     },
-    {
-      id: 4,
-      triggerTime: Math.floor(totalMinutes * 0.8),
-      radius: 1, // Closes completely
-      duration: 60,
-      label: 'Final Shrink'
+    { 
+        label: "Round 4: Game Over",         
+        targetRadius: 0,  
+        triggerPct: 0.90, 
+        warningPct: 0.005,  // 2% warning (Panic!)
+        shrinkPct: 0.02   // 0.5% shrink (Snap!)
     }
   ];
+
+  return config.map((c, i) => {
+    return {
+      id: i + 1,
+      label: c.label,
+      triggerTime: Math.floor(totalMinutes * c.triggerPct),
+      radius: c.targetRadius,
+      duration: Math.max(10, Math.floor(totalSeconds * c.shrinkPct)),
+      warningDuration: Math.max(30, Math.floor(totalSeconds * c.warningPct))
+    }
+  })
 }

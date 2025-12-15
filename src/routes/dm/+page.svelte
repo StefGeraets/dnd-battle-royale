@@ -3,6 +3,7 @@
 	import MapCanvas from '$lib/components/MapCanvas.svelte';
 	import MapSettings from '$lib/components/MapSettings.svelte';
 	import Timeline from '../../lib/components/Timeline.svelte';
+	import CountdownOverlay from '../../lib/components/CountdownOverlay.svelte';
 
 	const game = new GameEngine(true);
 
@@ -72,6 +73,8 @@
 	class="flex flex-col h-screen bg-zinc-950 text-white transition-colors duration-1000"
 	style="background-color: {game.themeColor}"
 >
+	<CountdownOverlay {game} />
+
 	<div class="flex flex-1 gap-4 p-4 overflow-hidden">
 		<div class="relative z-50 w-80 flex flex-col gap-4 overflow-y-auto">
 			<h1 class="border-b border-red-900 pb-2 text-2xl font-bold text-red-500">DM Control</h1>
@@ -97,7 +100,6 @@
 								step="0.5"
 								min="0.5"
 								max="12"
-								disabled={game.elapsedTime > 0}
 								value={game.totalGameHours}
 								onchange={(e) => game.setTotalTime(+e.currentTarget.value)}
 								class="w-20 rounded bg-zinc-800 p-1 text-sm text-white border border-zinc-600"

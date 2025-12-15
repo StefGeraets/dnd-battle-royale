@@ -30,6 +30,7 @@ export class GameEngine {
   shrinkDuration = $state(30000);
 
   totalGameHours = $state(2.5);
+  secondsUntilShrink = $state(0);
   isPresenterHidden = $state(true);
   schedule = $state(generateSchedule(2.5));
   nextRoundIndex = $state(0);
@@ -120,13 +121,25 @@ export class GameEngine {
 
   #tick() {
     if (!this.isRunning) return;
-
     this.elapsedTime += 100;
 
-    if(this.nextRound && (this.phase === 'STABLE' || this.phase === 'IDLE')) {
-      const triggerMs = this.nextRound.triggerTime * 60 * 1000;
+    if (this.nextRound) {
+      const shrinkStartMs = this.nextRound.triggerTime * 60 * 1000;
+      const warningStartMs = shrinkStartMs - (this.nextRound.warningDuration * 1000);
 
-      if (this.elapsedTime >= triggerMs) {
+
+      // Warning phase
+      if (this.elapsedTime >= warningStartMs && this.elapsedTime < shrinkStartMs) {
+        if (this.phase !== 'WARNING') {
+          this.phase = 'WARNING';
+          this.targetZone.r = this.nextRound.radius;
+        }
+
+        // Countdown
+        this.secondsUntilShrink = Math.ceil((shrinkStartMs - this.elapsedTime) / 1000);
+      }
+
+      if (this.elapsedTime >= shrinkStartMs && this.phase === 'WARNING') {
         this.executeScheduledShrink();
       }
     }
@@ -139,7 +152,6 @@ export class GameEngine {
     }
 
     this.#broadcast();
-
     if (this.elapsedTime % 1000 === 0) {
       this.#saveState();
     }
@@ -300,6 +312,7 @@ export class GameEngine {
         phase: this.phase,
         shrinkStartTime: this.shrinkStartTime,
         shrinkDuration: this.shrinkDuration,
+        secondsUntilShrink: this.secondsUntilShrink,
         nextRoundIndex: this.nextRoundIndex,
         mapImage: this.mapImage,
         themeColor: this.themeColor,
@@ -331,6 +344,7 @@ export class GameEngine {
       schedule: this.schedule,
       shrinkStartTime: this.shrinkStartTime,
       shrinkDuration: this.shrinkDuration,
+      secondsUntilShrink: this.secondsUntilShrink,
       nextRoundIndex: this.nextRoundIndex,
       mapImage: this.mapImage,
       themeColor: this.themeColor,
@@ -358,6 +372,7 @@ export class GameEngine {
       this.phase = data.phase;
       this.shrinkStartTime = data.shrinkStartTime;
       this.shrinkDuration = data.shrinkDuration;
+      this.secondsUntilShrink = data.secondsUntilShrink;
       this.nextRoundIndex = data.nextRoundIndex;
       this.totalGameHours = data.totalGameHours || 2.5;
       this.isPresenterHidden = data.isPresenterHidden || true;
@@ -390,6 +405,7 @@ export class GameEngine {
       this.phase = d.phase;
       this.shrinkStartTime = d.shrinkStartTime;
       this.shrinkDuration = d.shrinkDuration;
+      this.secondsUntilShrink = d.secondsUntilShrink;
       this.nextRoundIndex = d.nextRoundIndex;
       this.mapImage = d.mapImage;
       this.themeColor = d.themeColor; 

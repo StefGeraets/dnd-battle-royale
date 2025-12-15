@@ -24,6 +24,8 @@
 	{#each schedule as round}
 		{@const startMs = round.triggerTime * 60 * 1000}
 		{@const durationMs = round.duration * 1000}
+		{@const warningMs = round.warningDuration * 1000}
+		{@const warningStartMs = startMs - warningMs}
 
 		<div class="absolute top-8 h-3 w-px bg-zinc-500" style="left: {getPct(startMs)}%"></div>
 		<div
@@ -34,9 +36,17 @@
 		</div>
 
 		<div
+			class="absolute top-4 flex h-4 items-center justify-center truncate rounded bg-yellow-600/50 border border-yellow-600 text-[9px] text-yellow-200"
+			style="left: {getPct(warningStartMs)}%; width: {getPct(warningMs)}%;"
+			title="Warning time: {warningMs / 1000}s"
+		>
+			COUNTDOWN
+		</div>
+
+		<div
 			class="absolute top-4 flex h-4 items-center justify-center truncate rounded border border-red-800 bg-red-900/60 px-1 text-[9px] text-red-200"
 			style="left: {getPct(startMs)}%; width: {getPct(durationMs)}%;"
-			title="{round.label}: Shrinking"
+			title="{round.label}: Shrinking {durationMs / 1000}s"
 		>
 			SHRINK
 		</div>
