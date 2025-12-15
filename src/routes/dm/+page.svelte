@@ -4,6 +4,8 @@
 	import MapSettings from '$lib/components/MapSettings.svelte';
 	import Timeline from '../../lib/components/Timeline.svelte';
 	import CountdownOverlay from '../../lib/components/CountdownOverlay.svelte';
+	import DmOnboarding from '../../lib/components/DmOnboarding.svelte';
+	import { fly } from 'svelte/transition';
 
 	const game = new GameEngine(true);
 
@@ -12,6 +14,7 @@
 	let lastPlayedIndex = -1;
 	let volume = $state(0.5);
 	let selectedChestId = $state<string | null>(null);
+	let showOnboarding = $state(true);
 
 	let selectedChest = $derived(
 		selectedChestId ? game.specialAreas.find((c) => c.id === selectedChestId) : null
@@ -73,17 +76,37 @@
 	class="flex flex-col h-screen bg-zinc-950 text-white transition-colors duration-1000"
 	style="background-color: {game.themeColor}"
 >
+	{#if showOnboarding}
+		<DmOnboarding
+			onClose={() => {
+				console.log('clicked');
+				showOnboarding = false;
+			}}
+		/>
+	{/if}
+
 	<CountdownOverlay {game} />
 
 	<div class="flex flex-1 gap-4 p-4 overflow-hidden">
 		<div class="relative z-50 w-80 flex flex-col gap-4 overflow-y-auto">
-			<h1 class="border-b border-red-900 pb-2 text-2xl font-bold text-red-500">DM Control</h1>
-			<button
-				onclick={() => (showSetup = !showSetup)}
-				class="text-xs text-zinc-400 hover:text-white"
-			>
-				{showSetup ? 'Hide Setup' : 'Show Setup'}
-			</button>
+			<div class="flex justify-between items-center border-b border-red-900 pb-2">
+				<div class="flex items-center gap-2">
+					<h1 class="text-2xl font-bold text-red-500">DM Control</h1>
+					<button
+						class="text-[10px] bg-zinc-800 hover:bg-zinc-700 text-zinc-400 px-1.5 py-0.5 rounded border border-zinc-700 cursor-pointer"
+						onclick={() => (showOnboarding = true)}
+						title="Open Guide"
+					>
+						?
+					</button>
+				</div>
+				<button
+					onclick={() => (showSetup = !showSetup)}
+					class="text-xs text-zinc-400 hover:text-white"
+				>
+					{showSetup ? 'Hide Setup' : 'Show Setup'}
+				</button>
+			</div>
 
 			{#if showSetup}
 				<div class="rounded border border-zinc-700/50 bg-zinc-900 p-4 shadow-lg">
@@ -295,7 +318,8 @@
 
 			{#if selectedChest && mode === 'CHEST'}
 				<div
-					class="rounded border border-yellow-500 bg-yellow-900/40 p-4 shadow-lg animate-in fade-in slide-in-from-left-4"
+					transition:fly={{ y: -20, duration: 300 }}
+					class="rounded border border-yellow-500 bg-yellow-900/40 p-4 shadow-lg"
 				>
 					<div class="flex justify-between items-start mb-2">
 						<h2 class="text-xs font-bold uppercase text-yellow-500">Edit Chest</h2>

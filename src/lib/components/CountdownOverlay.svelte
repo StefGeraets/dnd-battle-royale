@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { fly } from 'svelte/transition';
 	import type { GameEngine } from '../game.svelte';
 
 	type Props = {
@@ -16,7 +17,7 @@
 
 <div class="pointer-events-none fixed inset-x-0 top-10 z-60 flex justify-center">
 	{#if game.phase === 'WARNING'}
-		<div class="animate-in slide-in-from-top-4 fade-in duration-500">
+		<div transition:fly={{ y: -50, duration: 500 }}>
 			<div
 				class="flex flex-col items-center gap-1 rounded-xl border-4 border-red-600 bg-red-950/90 px-8 py-4 text-white shadow-[0_0_50px_rgba(220,38,38,0.6)] backdrop-blur-sm"
 			>
