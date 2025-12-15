@@ -53,9 +53,9 @@ export function generateSchedule(totalHours: number): RoundConfig[] {
     },
     { 
         label: "Round 4: Game Over",         
-        targetRadius: 0,  
+        targetRadius: 2,  
         triggerPct: 0.90, 
-        warningPct: 0.005,  // 2% warning (Panic!)
+        warningPct: 0.007,  // 2% warning (Panic!)
         shrinkPct: 0.02   // 0.5% shrink (Snap!)
     }
   ];

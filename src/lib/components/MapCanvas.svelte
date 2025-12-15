@@ -263,6 +263,7 @@
                 {game.playerPos.x * CELL_SIZE + CELL_SIZE / 2}, 
                 {game.playerPos.y * CELL_SIZE + CELL_SIZE / 2}
             )"
+				class="transition-transform duration-150"
 			>
 				<circle r={Math.min(CELL_SIZE, CELL_SIZE) * 0.35} fill="black" opacity="0.5" cy="0.5" />
 				<circle

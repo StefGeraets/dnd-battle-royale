@@ -5,20 +5,41 @@
 	import Timeline from '../../lib/components/Timeline.svelte';
 	import CountdownOverlay from '../../lib/components/CountdownOverlay.svelte';
 	import DmOnboarding from '../../lib/components/DmOnboarding.svelte';
-	import { fly } from 'svelte/transition';
+	import { fly, slide } from 'svelte/transition';
 
 	const game = new GameEngine(true);
 
 	let mode = $state<'ZONE' | 'CHEST'>('ZONE');
-	let showSetup = $state(true);
 	let lastPlayedIndex = -1;
 	let volume = $state(0.5);
 	let selectedChestId = $state<string | null>(null);
-	let showOnboarding = $state(true);
+	let showOnboarding = $state(false); // TODO: Change when live
 
+	let showSetup = $state(true);
 	let selectedChest = $derived(
 		selectedChestId ? game.specialAreas.find((c) => c.id === selectedChestId) : null
 	);
+
+	$effect(() => {
+		if (game.phase === 'SHRINKING' && game.nextRoundIndex !== lastPlayedIndex) {
+			playSound();
+			lastPlayedIndex = game.nextRoundIndex;
+		}
+	});
+
+	// Helper to format ms to MM:SS
+	function formatTime(ms: number) {
+		const totalSeconds = Math.floor(ms / 1000);
+		const minutes = Math.floor(totalSeconds / 60);
+		const seconds = totalSeconds % 60;
+		return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+	}
+
+	function playSound() {
+		const audio = new Audio('/warhorn.mp3');
+		audio.volume = volume;
+		audio.play().catch((e) => console.warn('Audio blocked', e));
+	}
 
 	function selectChest(id: string | null) {
 		selectedChestId = id;
@@ -27,6 +48,7 @@
 
 	// Player movement
 	function handleKeyDown(e: KeyboardEvent) {
+		if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
 		const step = 1;
 
 		switch (e.code) {
@@ -42,31 +64,7 @@
 			case 'ArrowRight':
 				game.movePlayer(step, 0);
 				break;
-			case 'Space':
-				game.toggleTimer();
-				break;
 		}
-	}
-
-	// Helper to format ms to MM:SS
-	function formatTime(ms: number) {
-		const totalSeconds = Math.floor(ms / 1000);
-		const minutes = Math.floor(totalSeconds / 60);
-		const seconds = totalSeconds % 60;
-		return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-	}
-
-	$effect(() => {
-		if (game.phase === 'SHRINKING' && game.nextRoundIndex !== lastPlayedIndex) {
-			playSound();
-			lastPlayedIndex = game.nextRoundIndex;
-		}
-	});
-
-	function playSound() {
-		const audio = new Audio('/warhorn.mp3');
-		audio.volume = volume;
-		audio.play().catch((e) => console.warn('Audio blocked', e));
 	}
 </script>
 
@@ -77,18 +75,13 @@
 	style="background-color: {game.themeColor}"
 >
 	{#if showOnboarding}
-		<DmOnboarding
-			onClose={() => {
-				console.log('clicked');
-				showOnboarding = false;
-			}}
-		/>
+		<DmOnboarding onClose={() => (showOnboarding = false)} />
 	{/if}
 
 	<CountdownOverlay {game} />
 
 	<div class="flex flex-1 gap-4 p-4 overflow-hidden">
-		<div class="relative z-50 w-80 flex flex-col gap-4 overflow-y-auto">
+		<div class="relative z-50 w-80 flex flex-col gap-4 overflow-y-auto text-white">
 			<div class="flex justify-between items-center border-b border-red-900 pb-2">
 				<div class="flex items-center gap-2">
 					<h1 class="text-2xl font-bold text-red-500">DM Control</h1>
@@ -109,13 +102,17 @@
 			</div>
 
 			{#if showSetup}
-				<div class="rounded border border-zinc-700/50 bg-zinc-900 p-4 shadow-lg">
-					<h2 class="mb-3 text-xs font-bold uppercase text-yellow-500">Game Setup</h2>
-
-					<div class="mb-4">
-						<label for="gameHours" class="block text-xs text-zinc-400 mb-1"
-							>Total Game Duration (Hours)</label
-						>
+				<div
+					transition:slide
+					class="rounded border border-zinc-700/50 bg-zinc-900 p-4 shadow-lg space-y-4"
+				>
+					<div class={game.elapsedTime > 0 ? 'opacity-50' : ''}>
+						<label for="gameHours" class="block text-xs text-zinc-400 mb-1">
+							Total Game Duration (Hours)
+							{#if game.elapsedTime > 0}
+								<span class="text-[10px] text-red-400 ml-2">(Locked)</span>
+							{/if}
+						</label>
 						<div class="flex gap-2">
 							<input
 								name="gameHours"
@@ -123,35 +120,28 @@
 								step="0.5"
 								min="0.5"
 								max="12"
+								disabled={game.elapsedTime > 0}
 								value={game.totalGameHours}
 								onchange={(e) => game.setTotalTime(+e.currentTarget.value)}
-								class="w-20 rounded bg-zinc-800 p-1 text-sm text-white border border-zinc-600"
+								class="w-full rounded bg-zinc-800 p-1 text-sm text-white border border-zinc-600 disabled:cursor-not-allowed"
 							/>
-							<div class="text-xs flex items-center text-zinc-500">
-								(Ends at {Math.floor(game.totalGameHours * 60)} mins)
-							</div>
 						</div>
 					</div>
 
-					<div class="mb-4">
+					<div>
 						<!-- svelte-ignore a11y_label_has_associated_control -->
 						<label class="block text-xs text-zinc-400 mb-1">Presenter Screen</label>
 						<button
 							class="w-full py-2 px-3 rounded text-sm font-bold transition-colors {game.isPresenterHidden
-								? 'bg-red-600 text-white hover:bg-red-500'
-								: 'bg-green-600 text-white hover:bg-green-500'}"
+								? 'bg-red-600 hover:bg-red-500'
+								: 'bg-green-600 hover:bg-green-500'}"
 							onclick={() => game.togglePresenterCurtain()}
 						>
 							{game.isPresenterHidden ? '👁 REVEAL MAP' : '🙈 HIDE MAP'}
 						</button>
-						<p class="text-[10px] text-zinc-500 mt-1">
-							{game.isPresenterHidden
-								? 'Players see "Game Begins Soon" screen.'
-								: 'Players can see the map.'}
-						</p>
 					</div>
 
-					<div class="mb-4">
+					<div>
 						<label for="volume" class="block text-xs text-zinc-400 mb-1">Audio (Warhorn)</label>
 						<div class="flex items-center gap-2">
 							<button
@@ -172,21 +162,15 @@
 						</div>
 					</div>
 
-					<div>
-						<!-- svelte-ignore a11y_label_has_associated_control -->
-						<label class="block text-xs text-zinc-400 mb-1">Preparation</label>
-						<button
-							class="w-full py-2 px-3 rounded text-sm font-bold bg-zinc-700 hover:bg-zinc-600 text-zinc-200"
-							onclick={() => (mode = 'CHEST')}
-						>
-							🎁 Place Chests
-						</button>
+					<div class="pt-2 border-t border-zinc-700">
+						<MapSettings {game} />
 					</div>
 				</div>
 			{/if}
 
 			{#if game.distanceOutside > 0}
 				<div
+					transition:fly={{ y: -20 }}
 					class="animate-pulse rounded border-2 border-red-600 bg-red-800 p-3 text-center shadow-xl"
 				>
 					<div class="text-xs font-bold uppercase text-red-200">⚠ Party in Storm</div>
@@ -196,171 +180,160 @@
 				</div>
 			{/if}
 
-			<div class="bg-zinc-900 p-4 rounded border border-zinc-700 shadow-lg">
-				<h2 class="text-xs uppercase tracking-wider font-bold text-gray-400 mb-2">Timer</h2>
-				<div class="text-4xl font-mono mb-3">
-					{formatTime(game.elapsedTime)}
-				</div>
-				<button
-					class="px-4 py-3 rounded font-bold transition-colors w-full {game.isRunning
-						? 'bg-yellow-600 hover:bg-yellow-500'
-						: 'bg-green-600 hover:bg-green-500'}"
-					onclick={() => game.toggleTimer()}
-				>
-					{game.isRunning ? 'PAUSE GAME' : 'START GAME'}
-				</button>
-			</div>
-
-			<div class="rounded border border-zinc-700 bg-zinc-900 p-4 shadow-lg">
-				<h2 class="text-xs uppercase tracking-wider font-bold text-gray-400 mb-2">Current Phase</h2>
-
+			<div class="overflow-hidden rounded border border-zinc-700 bg-zinc-900 shadow-xl">
 				<div
-					class="mb-2 text-lg font-bold {game.phase === 'SHRINKING'
-						? 'animate-pulse text-red-500'
-						: 'text-blue-400'}"
+					class="flex itemx-center justify-between border-b border-zinc-800 bg-zinc-950 px-4 py-2"
 				>
-					{game.phase}
+					<span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400"
+						>Mission Clock</span
+					>
+					<div class="flex items-center gap-2">
+						<span
+							class="span h-2 w-2 rounded-full {game.isRunning
+								? 'bg-green-500 animate-pulse'
+								: 'bg-red-500'}"
+						></span>
+						<span class="text-xs font-bold text-zinc-300">{game.isRunning ? 'LIVE' : 'PAUSED'}</span
+						>
+					</div>
 				</div>
 
-				{#if game.phase === 'SHRINKING'}
-					<div class="h-2 w-full overflow-hidden rounded-full bg-zinc-800">
-						<div
-							class="h-full bg-red-600 transition-all duration-100 ease-linear"
-							style="width: {((game.elapsedTime - game.shrinkStartTime) / game.shrinkDuration) *
-								100}%"
-						></div>
-					</div>
-				{/if}
-			</div>
-
-			<div class="rounded border border-zinc-700 bg-zinc-900 p-4 shadow-lg">
-				<h2 class="text-xs uppercase tracking-wider font-bold text-gray-400 mb-2">
-					Upcoming Event
-				</h2>
-
-				{#if game.nextRound}
-					<div class="relative">
-						<div class="mb-1 text-xl font-bold text-white">{game.nextRound.label}</div>
-
-						<div class="flex justify-between text-sm text-zinc-400 mt-4">
-							<span>Triggers at:</span>
-							<span class="font-mono text-white">{game.nextRound.triggerTime}:00</span>
-						</div>
-
-						<div class="flex justify-between text-sm text-zinc-400 mt-4">
-							<span>Target radius:</span>
-							<span class="font-mono text-white">{game.nextRound.radius}%</span>
-						</div>
+				<div class="p-4">
+					<div class="mb-4 text-center font-mono text-5xl font-black tracking-tight text-white">
+						{formatTime(game.elapsedTime)}
 					</div>
 
-					{@const msUtil = game.nextRound.triggerTime * 60 * 1000 - game.elapsedTime}
-					{@const totalDuration = game.nextRound.triggerTime * 60 * 1000}
-
-					{#if msUtil > 0}
-						<div class="w-full mt-4 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-							<div
-								class="h-full bg-blue-600 transition-all duration-1000"
-								style="width: {(game.elapsedTime / totalDuration) * 100}%"
-							></div>
-						</div>
-
-						<div class="text-center text-xs mt-1 text-zinc-500">
-							T-minus {formatTime(msUtil)}
-						</div>
-					{:else}
-						<div class="mt-2 text-center text-sm text-red-400 font-bold uppercase">
-							Triggering Now
-						</div>
-					{/if}
-
-					{#if msUtil > 0}
-						<div
-							class="mt-4 p-3 bg-yellow-900/20 border border-yellow-700/50 rounded text-sm text-yellow-200"
-						>
-							<strong>DM Action:</strong> Click the map now to set the center for this round
-							<br /><br />
-							<em class="opacity-70 text-xs"
-								>If no click, center stays at {game.activeZone.x.toFixed(0)}, {game.activeZone.y.toFixed(
-									0
-								)}.</em
+					<div class="mb-4 space-y-1">
+						<div class="flex-justify-between text-xs">
+							<span class="text-zinc-400">Current Phase</span>
+							<span
+								class="font-bold uppercase {game.phase === 'SHRINKING'
+									? 'text-red-500 animate-pulse'
+									: game.phase === 'WARNING'
+										? 'text-yellow-500'
+										: 'text-blue-400'}">{game.phase}</span
 							>
 						</div>
-					{/if}
-				{:else}
-					<div class="text-center text-green-500 font-bold">ALL ROUND COMPLETE</div>
-				{/if}
+						<div class="h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+							{#if game.phase === 'SHRINKING'}
+								<div
+									class="h-full bg-red-500 transition-all duration-100 ease-linear"
+									style="width: {((game.elapsedTime - game.shrinkStartTime) / game.shrinkDuration) *
+										100}%"
+								></div>
+							{:else if game.nextRound}
+								{@const total = game.nextRound.triggerTime * 60 * 1000}
+								<div
+									class="h-full bg-zinc-700 transition-all duration-1000"
+									style="width: {(game.elapsedTime / total) * 100}%"
+								></div>
+							{/if}
+						</div>
+					</div>
+
+					<div class="mb-4 rounded bg-zinc-800 p-2 text-center text-xs">
+						{#if game.nextRound}
+							<span class="text-zinc-400">Next: </span>
+							<span class="font-bold text-white">{game.nextRound.label}</span>
+							<div class="mt-0.5 font-mono text-zinc-500">
+								Target: {game.nextRound.triggerTime}:00
+							</div>
+						{:else}
+							<span class="text-green-400 font-bold">ALL ROUNDS COMPLETE</span>
+						{/if}
+					</div>
+
+					<button
+						class="w-full rounded py-2 text-sm font-bold shadow-lg transition-transform text-white active:scale-95 {game.isRunning
+							? 'bg-yellow-600 hover:bg-yellow-500'
+							: 'bg-green-600 hover:bg-green-500'}"
+						onclick={() => {
+							game.toggleTimer();
+							showSetup = false;
+						}}
+					>
+						{game.isRunning ? 'PAUSE CLOCK' : 'START CLOCK'}
+					</button>
+				</div>
 			</div>
 
 			<div class="rounded border border-zinc-700 bg-zinc-900 p-4 shadow-lg">
-				<h2 class="mb-2 text-xs font-bold uppercase text-gray-400">Interaction Mode</h2>
+				<h2 class="mb-2 text-xs font-bold uppercase text-zinc-500">Interaction Mode</h2>
+
 				<div class="flex gap-2">
 					<button
-						class="flex-1 py-2 text-sm font-bold rounded {mode === 'ZONE'
+						class="flex-1 py-2 text-sm font-bold rounded transition-colors {mode === 'ZONE'
 							? 'bg-blue-600 text-white'
-							: 'bg-zinc-800 text-zinc-400'}"
+							: 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'}"
 						onclick={() => (mode = 'ZONE')}
 					>
 						🎯 Move Zone
 					</button>
 					<button
-						class="flex-1 py-2 text-sm font-bold rounded {mode === 'CHEST'
+						class="flex-1 py-2 text-sm font-bold rounded transition-colors {mode === 'CHEST'
 							? 'bg-yellow-600 text-white'
-							: 'bg-zinc-800 text-zinc-400'}"
+							: 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'}"
 						onclick={() => (mode = 'CHEST')}
 					>
 						🎁 Add Chest
 					</button>
 				</div>
-				{#if mode === 'CHEST'}
-					<p class="mt-2 text-xs text-yellow-200">Click map to spawn 2x2 chest area.</p>
-				{/if}
+
+				<div class="mt-3 min-h-[60px]">
+					{#if selectedChest && mode === 'CHEST'}
+						<div
+							transition:fly={{ y: -10, duration: 200 }}
+							class="rounded border border-yellow-600/30 bg-yellow-900/20 p-3"
+						>
+							<div class="flex justify-between items-center mb-2">
+								<h2 class="text-xs font-bold text-yellow-500">Edit Selected</h2>
+								<button
+									class="text-xs text-slate-400 hover:text-white"
+									onclick={() => (selectedChestId = null)}
+								>
+									CANCEL
+								</button>
+							</div>
+
+							<input
+								type="text"
+								value={selectedChest.name}
+								oninput={(e) => game.renameChest(selectedChest.id, e.currentTarget.value)}
+								class="w-full rounded bg-zinc-800 p-1 text-xs text-white border border-yellow-700/50 focus:border-yellow-500 outline-none mb-2"
+							/>
+
+							<button
+								class="w-full py-1 rounded-full text-xs font-bold bg-red-900/30 text-red-300 hover:bg-red-900 border border-red-900/50"
+								onclick={() => {
+									game.deleteChest(selectedChest.id);
+									selectedChestId = null;
+								}}
+							>
+								Delete Area
+							</button>
+						</div>
+					{:else if mode === 'CHEST'}
+						<p
+							class="text-center text-xs text-yellow-500/80"
+							in:slide={{ axis: 'y' }}
+							out:slide={{ axis: 'y' }}
+						>
+							Click empty grid to add 2x2 chest. <br />
+							Click existing chest to edit.
+						</p>
+					{:else}
+						<p
+							class="text-center text-xs text-blue-400/80"
+							in:slide={{ axis: 'y' }}
+							out:slide={{ axis: 'y' }}
+						>
+							Click map to set the next Safe Zone center.<br />(Only active before shrink starts)
+						</p>
+					{/if}
+				</div>
 			</div>
 
-			{#if selectedChest && mode === 'CHEST'}
-				<div
-					transition:fly={{ y: -20, duration: 300 }}
-					class="rounded border border-yellow-500 bg-yellow-900/40 p-4 shadow-lg"
-				>
-					<div class="flex justify-between items-start mb-2">
-						<h2 class="text-xs font-bold uppercase text-yellow-500">Edit Chest</h2>
-						<button
-							class="text-xs text-slate-400 hover:text-white"
-							onclick={() => (selectedChestId = null)}>✕</button
-						>
-					</div>
-
-					<label for="chestName" class="block text-xs text-slate-400 mb-1">Name / Loot</label>
-					<input
-						name="chestName"
-						type="text"
-						value={selectedChest.name}
-						oninput={(e) => game.renameChest(selectedChest.id, e.currentTarget.value)}
-						class="w-full rounded bg-slate-800 p-2 text-sm text-white border border-yellow-700/50 focus:border-yellow-500 outline-none mb-3"
-					/>
-
-					<div class="flex gap-2">
-						<button
-							class="flex-1 py-2 rounded text-xs font-bold bg-red-900/50 text-red-300 hover:bg-red-900 border border-red-900"
-							onclick={() => {
-								game.deleteChest(selectedChest.id);
-								selectedChestId = null;
-							}}
-						>
-							🗑 Delete Area
-						</button>
-						<button
-							class="flex-1 py-2 rounded text-xs font-bold bg-slate-700 hover:bg-slate-600"
-							onclick={() => (selectedChestId = null)}
-						>
-							Done
-						</button>
-					</div>
-				</div>
-			{/if}
-
-			<MapSettings {game} />
-
-			<div class="mt-auto">
+			<div class="mt-auto pt-4 border-t border-zinc-800">
 				<button
 					class="w-full text-xs text-red-400 bg-red-700/20 hover:text-red-500 hover:bg-red-950/30 p-2 rounded transition-colors border border-transparent hover:border-red-900/50"
 					onclick={() => {
