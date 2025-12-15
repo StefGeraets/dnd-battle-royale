@@ -21,6 +21,7 @@
 	let mapImageEl: HTMLImageElement;
 	let metrics = $state({ x: 0, y: 0, s: 1 }); // Default to 1 to avoid div/0
 	let theme = $derived(STORM_THEMES[game.stormThemeId] || STORM_THEMES['fire']);
+	let stormRgb = $derived(hexToRgb(theme.primary));
 
 	function updateMetrics() {
 		if (mapImageEl) {
@@ -83,6 +84,20 @@
 			game.setNextZoneCenter(centerX, centerY);
 		}
 	}
+
+	function hexToRgb(hex: string) {
+		const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+		hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
+
+		const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+		return result
+			? {
+					r: parseInt(result[1], 16) / 255,
+					g: parseInt(result[2], 16) / 255,
+					b: parseInt(result[3], 16) / 255
+				}
+			: { r: 1, g: 0, b: 0 };
+	}
 </script>
 
 <div class="relative flex h-full w-full items-center justify-center overflow-hidden">
@@ -109,7 +124,10 @@
 				<feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" result="noise" />
 				<feColorMatrix
 					type="matrix"
-					values="1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.4 0"
+					values="{stormRgb.r} 0 0 0 0
+									0 {stormRgb.g} 0 0 0
+									0 0 {stormRgb.b} 0 0 
+									0 0 0 0.4 0"
 					in="noise"
 					result="coloredNoise"
 				/>
