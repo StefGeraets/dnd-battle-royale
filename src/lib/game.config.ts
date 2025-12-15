@@ -9,6 +9,14 @@ export type RoundConfig = {
 	label: string;
 };
 
+export type StormTheme = {
+  id: string;
+  label: string;
+  primary: string;
+  secondary: string;
+  accent: string;
+}
+
 /**
  * Generates a schedule based on total hours.
  * Standard Logic (based on 2.5h):
@@ -63,3 +71,47 @@ export function generateSchedule(totalHours: number): RoundConfig[] {
     }
   })
 }
+
+export const STORM_THEMES: Record<string, StormTheme> = {
+  fire: { 
+      id: 'fire', label: 'Inferno', 
+      primary: '#500000', secondary: '#200000', accent: '#ef4444' 
+  },
+  ice: { 
+      id: 'ice', label: 'Blizzard', 
+      primary: '#0c4a6e', secondary: '#082f49', accent: '#38bdf8' 
+  },
+  toxic: { 
+      id: 'toxic', label: 'Acid Cloud', 
+      primary: '#14532d', secondary: '#052e16', accent: '#4ade80' 
+  },
+  necrotic: { 
+      id: 'necrotic', label: 'Death Fog', 
+      primary: '#4c1d95', secondary: '#2e1065', accent: '#a78bfa' 
+  },
+  sandy: { 
+      id: 'sandy', label: 'Sandstorm', 
+      primary: '#713f12', secondary: '#451a03', accent: '#facc15' 
+  }
+}
+
+export const MAP_PRESETS = [
+  { 
+    id: 'islands', 
+    label: 'Rayrock Isles', 
+    url: '/islands.jpg', 
+    color: '#3C5D68' 
+  },
+  { 
+    id: 'forest', 
+    label: 'Deep Forest', 
+    url: 'https://placehold.co/1000x1000/064e3b/FFF?text=Forest', 
+    color: '#064e3b' 
+  },
+  { 
+    id: 'desert', 
+    label: 'Scorched Desert', 
+    url: 'https://placehold.co/1000x1000/78350f/FFF?text=Desert', 
+    color: '#451a03' 
+  }
+];

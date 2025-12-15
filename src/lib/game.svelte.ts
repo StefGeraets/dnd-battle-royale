@@ -1,5 +1,5 @@
 import { browser } from "$app/environment";
-import { generateSchedule, GRID_SIZE } from "./game.config";
+import { generateSchedule, GRID_SIZE, STORM_THEMES } from "./game.config";
 import { getAverageColor } from "./utils/color";
 
 export type Point = {x: number; y: number };
@@ -36,8 +36,9 @@ export class GameEngine {
   nextRoundIndex = $state(0);
 
   // Visual config
-  mapImage = $state('/battleRoyale.jpg');
+  mapImage = $state('/islands.jpg');
   themeColor = $state('#3C5D68');
+  stormThemeId = $state('fire');
   specialAreas = $state<SpecialArea[]>([]);
 
   // COMPUTED VALUES
@@ -224,7 +225,7 @@ export class GameEngine {
     }
 
     this.specialAreas.push({
-      id: crypto.randomUUID(),
+      id: `${Date.now()}-${Math.floor(Math.random() * 1000000000)}`,
       x: gridX,
       y: gridY,
       name: `Chest ${this.specialAreas.length + 1}`
@@ -273,6 +274,23 @@ export class GameEngine {
     this.nextRoundIndex++;
   }
 
+  setStormTheme(id: string) {
+    if (!this.#isDm) return;
+    if (STORM_THEMES[id]) {
+      this.stormThemeId = id;
+      this.#broadcast();
+      this.#saveState();
+    }
+  }
+
+  applyMapPreset(preset: { url: string, color: string }) {
+    if (!this.#isDm) return;
+    this.mapImage = preset.url;
+    this.themeColor = preset.color;
+    this.#broadcast();
+    this.#saveState();
+  }
+
   // Visual actions
   setMapImage(url: string) {
     if (!this.#isDm) return;
@@ -316,6 +334,7 @@ export class GameEngine {
         nextRoundIndex: this.nextRoundIndex,
         mapImage: this.mapImage,
         themeColor: this.themeColor,
+        stormThemeId: this.stormThemeId,
         totalGameHours: this.totalGameHours,
         isPresenterHidden: this.isPresenterHidden,
         schedule: $state.snapshot(this.schedule),
@@ -348,6 +367,7 @@ export class GameEngine {
       nextRoundIndex: this.nextRoundIndex,
       mapImage: this.mapImage,
       themeColor: this.themeColor,
+      stormThemeId: this.stormThemeId,
       timestamp: Date.now()
     }
 
@@ -379,6 +399,7 @@ export class GameEngine {
       this.schedule = data.schedule || generateSchedule(this.totalGameHours);
       this.mapImage = data.mapImage || this.mapImage;
       this.themeColor = data.themeColor || this.themeColor;
+      this.stormThemeId = data.stormThemeId || this.stormThemeId;
       this.specialAreas = data.specialAreas || [];
       
       // Note: We do NOT restore 'isRunning'. 
@@ -409,6 +430,7 @@ export class GameEngine {
       this.nextRoundIndex = d.nextRoundIndex;
       this.mapImage = d.mapImage;
       this.themeColor = d.themeColor; 
+      this.stormThemeId = d.stormThemeId || this.stormThemeId;
       this.specialAreas = d.specialAreas || [];
       this.totalGameHours = d.totalGameHours;
       this.isPresenterHidden = d.isPresenterHidden;

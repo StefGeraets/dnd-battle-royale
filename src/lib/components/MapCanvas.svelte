@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { GameEngine } from '$lib/game.svelte';
-	import { GRID_SIZE } from '../game.config';
+	import { GRID_SIZE, STORM_THEMES } from '../game.config';
 
 	type Props = {
 		game: GameEngine;
@@ -20,6 +20,7 @@
 	// We track the Image's position on screen to align the SVG
 	let mapImageEl: HTMLImageElement;
 	let metrics = $state({ x: 0, y: 0, s: 1 }); // Default to 1 to avoid div/0
+	let theme = $derived(STORM_THEMES[game.stormThemeId] || STORM_THEMES['fire']);
 
 	function updateMetrics() {
 		if (mapImageEl) {
@@ -146,19 +147,20 @@
 			y="0"
 			width="100%"
 			height="100%"
-			fill="#500000"
+			fill={theme.primary}
 			mask="url(#fsStormMask)"
 			filter="url(#storm-fog)"
-			class="opacity-90"
+			class="opacity-90 transition-colors duration-1000"
 		/>
 		<rect
 			x="0"
 			y="0"
 			width="100%"
 			height="100%"
-			fill="#200000"
+			fill={theme.secondary}
 			fill-opacity="0.5"
 			mask="url(#fsStormMask)"
+			class="transition-colors duration-1000"
 		/>
 
 		<g transform="translate({metrics.x}, {metrics.y}) scale({metrics.s / 100})">
@@ -232,9 +234,10 @@
 				cy={game.currentZone.y}
 				r={game.currentZone.r}
 				fill="none"
-				stroke="#ff3333"
+				stroke={theme.accent}
 				stroke-width="0.5"
 				filter="url(#glow)"
+				class="transition-colors duration-1000"
 			/>
 
 			<g

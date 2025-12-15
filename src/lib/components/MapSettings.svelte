@@ -1,11 +1,14 @@
 <script lang="ts">
 	import type { GameEngine } from '$lib/game.svelte';
+	import { MAP_PRESETS, STORM_THEMES } from '../game.config';
 
 	type Props = {
 		game: GameEngine;
 	};
 
 	let { game }: Props = $props();
+
+	const ENABLE_CUSTOM_UPLOAD = false;
 
 	function handleFileUpload(e: Event) {
 		const input = e.target as HTMLInputElement;
@@ -28,47 +31,80 @@
 	}
 </script>
 
-<div class="rounded border border-zinc-700 bg-zinc-900 p-4 shadow-lg">
-	<h2 class="mb-4 text-xs font-bold uppercase tracking-wider text-gray-400">Map Settings</h2>
+<div class="rounded border border-zinc-700 bg-zinc-900 p-4 shadow-lg space-y-4">
+	<h2 class="text-xs font-bold uppercase tracking-wider text-gray-400">Map Settings</h2>
 
-	<div class="space-y-4">
-		<div>
-			<label for="fileUpload" class="mb-1 block text-xs text-zinc-500">Upload Map (Max 3MB)</label>
-			<input
-				name="fileUpload"
-				type="file"
-				accept="image/*"
-				onchange={handleFileUpload}
-				class="block w-full text-xs text-zinc-300 file:mr-4 file:rounded file:border-0 file:bg-zinc-700 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-white hover:file:bg-zinc-600"
-			/>
+	<div>
+		<label for="stormType" class="mb-2 block text-xs text-zinc-500">Storm Type</label>
+		<div class="grid grid-cols-3 gap-2">
+			{#each Object.values(STORM_THEMES) as theme}
+				<button
+					class="rounded border px-2 py-1 text-xs font-bold transition-all cursor-pointer text-white {game.stormThemeId ===
+					theme.id
+						? 'scale-105 shadow-md'
+						: 'opacity-60 hover:opacity-100'}"
+					style="background-color: {theme.primary}; border-color: {theme.accent};"
+					onclick={() => game.setStormTheme(theme.id)}
+				>
+					{theme.label}
+				</button>
+			{/each}
 		</div>
+	</div>
 
-		<div>
-			<label for="imageUrl" class="mb-1 block text-xs text-zinc-500">Or Image URL</label>
-			<input
-				name="imageUrl"
-				type="text"
-				placeholder="https://..."
-				value={game.mapImage}
-				onchange={(e) => game.setMapImage(e.currentTarget.value)}
-				class="w-full rounded bg-zinc-800 p-2 text-xs text-white border border-zinc-700 focus:border-blue-500 outline-none"
-			/>
+	<div>
+		<label for="mapPreset" class="mb-2 block text-xs text-zinc-500">Select Map</label>
+		<div class="grid grid-cols-1 gap-2">
+			{#each MAP_PRESETS as preset}
+				<button
+					class="flex items-center gap-3 rounded bg-zinc-800 p-2 border border-zinc-700 hover:bg-zinc-700 text-left transition-colors cursor-pointer
+          {game.mapImage === preset.url ? 'border-blue-500 ring-1 ring-blue-500' : ''}"
+					onclick={() => game.applyMapPreset(preset)}
+				>
+					<div
+						class="h-8 w-8 rounded bg-cover bg-center"
+						style="background-image: url({preset.url})"
+					></div>
+					<span class="text-xs font-bold text-zinc-200">{preset.label}</span>
+				</button>
+			{/each}
 		</div>
+	</div>
 
-		<div>
-			<label for="bgColor" class="mb-1 block text-xs text-zinc-500">Ambiance Color</label>
-			<div class="flex gap-2">
+	<div class="relative rounded border border-zinc-700 border-dashed p-4 text-center opacity-75">
+		{#if !ENABLE_CUSTOM_UPLOAD}
+			<div
+				class="absolute inset-0 z-10 flex items-center justify-center rounded bg-zinc-900/80 backdrop-blur-[1px]"
+			>
+				<div class="text-center">
+					<div class="text-xs font-bold text-yellow-500 mb-1">⭐ Supporter Feature</div>
+					<button
+						class="bg-yellow-600 hover:bg-yellow-500 text-black text-[10px] font-bold px-3 py-1 rounded"
+					>
+						Unlock Custom Maps
+					</button>
+				</div>
+			</div>
+		{/if}
+
+		<div class="opacity-30 blur-[1px]">
+			<label for="upload" class="mb-1 block text-xs text-zinc-500">Upload Map</label>
+			<input name="upload" type="file" disabled class="block w-full text-xs text-zinc-500" />
+		</div>
+	</div>
+
+	<div>
+		<details class="text-[10px] text-zinc-600">
+			<summary class="cursor-pointer hover:text-zinc-400">Advanced: Manual Theme Color</summary>
+			<div class="mt-2 flex gap-2">
 				<input
-					name="bgColor"
 					type="color"
 					value={game.themeColor}
 					oninput={(e) => game.setThemeColor(e.currentTarget.value)}
-					class="h-8 w-12 cursor-pointer rounded border-0 bg-transparent p-0"
+					class="h-6 w-8 cursor-pointer rounded border-0 bg-transparent p-0"
 				/>
-				<div class="flex-1 text-xs text-zinc-400 flex items-center">
-					{game.themeColor}
-				</div>
+				<span class="text-xs text-zinc-400">Background Tint</span>
 			</div>
-		</div>
+		</details>
 	</div>
 </div>
