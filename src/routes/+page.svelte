@@ -131,7 +131,7 @@
 				</div>
 				<button
 					onclick={() => (showSetup = !showSetup)}
-					class="text-xs text-zinc-400 hover:text-white"
+					class="text-xs text-zinc-400 hover:text-white cursor-pointer"
 				>
 					{showSetup ? 'Hide Setup' : 'Show Setup'}
 				</button>
