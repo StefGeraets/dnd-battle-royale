@@ -7,6 +7,7 @@
 	import DmOnboarding from '$lib/components/DmOnboarding.svelte';
 	import { fly, slide } from 'svelte/transition';
 	import { onMount } from 'svelte';
+	import { asset } from '$app/paths';
 
 	const game = new GameEngine(true);
 
@@ -49,7 +50,7 @@
 	}
 
 	function playSound() {
-		const audio = new Audio('/warhorn.mp3');
+		const audio = new Audio(asset('/warhorn.mp3'));
 		audio.volume = volume;
 		audio.play().catch((e) => console.warn('Audio blocked', e));
 	}

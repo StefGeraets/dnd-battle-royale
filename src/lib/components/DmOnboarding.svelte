@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { fade, scale } from 'svelte/transition';
+  import { asset } from '$app/paths';
 
 	type Props = {
 		onClose: () => void;
@@ -22,7 +23,7 @@
 					<span>Battle Royale Manager v1.0</span>
 					<span class="text-slate-600">•</span>
 					<a
-						href="/WUBG-Homebrewery.pdf"
+						href={asset('/WUBG-Homebrewery.pdf')}
 						target="_blank"
 						class="flex items-center gap-1 text-blue-400 hover:text-blue-300 hover:underline"
 					>

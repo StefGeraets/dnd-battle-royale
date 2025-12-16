@@ -1,3 +1,5 @@
+import { asset } from '$app/paths';
+
 export const GRID_SIZE = 24;
 
 export type RoundConfig = {
@@ -99,19 +101,19 @@ export const MAP_PRESETS = [
   { 
     id: 'islands', 
     label: 'Rayrock Isles', 
-    url: '/islands.jpg', 
+    url: asset('/islands.jpg'), 
     color: '#3C5D68' 
   },
-  { 
-    id: 'forest', 
-    label: 'Deep Forest', 
-    url: 'https://placehold.co/1000x1000/064e3b/FFF?text=Forest', 
-    color: '#064e3b' 
-  },
-  { 
-    id: 'desert', 
-    label: 'Scorched Desert', 
-    url: 'https://placehold.co/1000x1000/78350f/FFF?text=Desert', 
-    color: '#451a03' 
-  }
+  // { 
+  //   id: 'forest', 
+  //   label: 'Deep Forest', 
+  //   url: asset('https://placehold.co/1000x1000/064e3b/FFF?text=Forest'), 
+  //   color: '#064e3b' 
+  // },
+  // { 
+  //   id: 'desert', 
+  //   label: 'Scorched Desert', 
+  //   url: asset('https://placehold.co/1000x1000/78350f/FFF?text=Desert'), 
+  //   color: '#451a03' 
+  // }
 ];

@@ -1,6 +1,7 @@
 import { browser } from "$app/environment";
 import { generateSchedule, GRID_SIZE, STORM_THEMES } from "./game.config";
 import { getAverageColor } from "./utils/color";
+import { asset } from '$app/paths';
 
 export type Point = {x: number; y: number };
 export type Zone = { x: number; y: number; r: number };
@@ -36,7 +37,7 @@ export class GameEngine {
   nextRoundIndex = $state(0);
 
   // Visual config
-  mapImage = $state('/islands.jpg');
+  mapImage = $state(asset('/islands.jpg'));
   themeColor = $state('#3C5D68');
   stormThemeId = $state('fire');
   specialAreas = $state<SpecialArea[]>([]);
