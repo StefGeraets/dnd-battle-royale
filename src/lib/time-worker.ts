@@ -1,4 +1,4 @@
-let interval = null;
+let interval: string | number | NodeJS.Timeout | null | undefined = null;
 let expected = Date.now();
 const TICK_RATE = 100;
 
