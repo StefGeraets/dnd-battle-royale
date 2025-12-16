@@ -1,38 +1,81 @@
-# sv
+# D&D Battle Royale Manager
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A specialized DM tool for running "Battle Royale" style D&D sessions (inspired by *WizardUnknown's Battlegrounds*). 
 
-## Creating a project
+This app manages the map, the shrinking storm mechanism, loot drops, and provides a synchronized "Presenter View" to display on a TV for your players.
 
-If you're seeing this, you've probably already done this step. Congrats!
+## 📜 Rules Module
+This app is designed to run the **WizardUnknown's Battlegrounds** module.
+* A PDF copy of the rules (`WUBG-Homebrewery.pdf`) is included in the `static/` folder.
+* DMs can access this directly from the **Onboarding Screen** inside the app.
 
-```sh
-# create a new project in the current directory
-npx sv create
+## ✨ Features
 
-# create a new project in my-app
-npx sv create my-app
-```
+* **Dual-Screen Sync:** DM controls the state on a laptop; players see a polished, HUD-free map on the TV.
+* **Automated Storm:** Zones shrink automatically based on a configurable game schedule.
+* **Dynamic Visuals:** Choose from multiple themes (Fire, Ice, Toxic) with animated procedural fog.
+* **Loot Management:** Place and manage 2x2 "Loot Chest" zones on the grid.
+* **Persistence:** Auto-saves to your browser's local storage so you never lose game state during a reload.
 
-## Developing
+## 🛠️ Local Installation & Setup
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+This project uses [Bun](https://bun.sh) as the package manager and runtime.
 
-```sh
-npm run dev
+1.  **Clone the repository**
+    ```bash
+    git clone <your-repo-url>
+    cd <your-repo-name>
+    ```
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+2.  **Install dependencies**
+    ```bash
+    bun install
+    ```
 
-## Building
+3.  **Start the development server**
+    ```bash
+    bun run dev
+    ```
 
-To create a production version of your app:
+4.  **Open the App**
+    * **DM Console:** [http://localhost:5173/dm](http://localhost:5173/dm)
+    * **Player View:** [http://localhost:5173/presenter](http://localhost:5173/presenter)
 
-```sh
-npm run build
-```
+## 🎮 How to Use
 
-You can preview the production build with `npm run preview`.
+### 1. Setup (Pre-Game)
+* Open the **DM Console**. You will see an onboarding guide with a link to the **PDF Rules**.
+* **Second Screen:** Open the **Player View** in a new window, drag it to your TV/Second Monitor, and press `F11` for fullscreen.
+* **Configuration:** * Set the **Total Game Time** (e.g., 2.5 Hours). The storm schedule generates automatically.
+    * Select a **Map Preset** and **Storm Theme** (e.g., Ruins + Fire Storm).
+    * Toggle **"Hide Map"** to keep the screen black (or show a splash screen) until you are ready.
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+### 2. Preparation (Loot)
+* Switch interaction mode to **🎁 Chest**.
+* Click empty grid cells to spawn **2x2 Loot Chests**.
+* Click existing chests to **Rename** or **Delete** them.
+
+### 3. Running the Game
+* Click **👁 REVEAL MAP** to fade in the player screen.
+* Click **START CLOCK** (or press `Space`) to begin the game timer.
+* **Zone Logic:** * When the "Warning Phase" starts, switch to **🎯 Zone** mode.
+    * Click anywhere on the map to set the **Center** of the next Safe Zone.
+    * If you don't click, the zone shrinks concentrically by default.
+* **Party Tracking:** Use `Arrow Keys` to move the "P" (Party) token around the map.
+
+### ⌨️ Keyboard Shortcuts
+
+| Key | Action |
+| :--- | :--- |
+| **Space** | Start / Pause Timer |
+| **Z** | Switch to **Zone** Mode |
+| **C** | Switch to **Chest** Mode |
+| **Arrows** | Move Party Token |
+| **H** | Play Warhorn Sound |
+
+## 📦 Building for Production
+
+To create a static production build (e.g., for GitHub Pages):
+
+```bash
+bun run build

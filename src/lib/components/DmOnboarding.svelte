@@ -17,8 +17,18 @@
 	>
 		<div class="border-b border-zinc-800 bg-zinc-950 p-6 flex justify-between items-center">
 			<div>
-				<h1 class="text-2xl font-bold text-white">Battle Royale DM Console</h1>
-				<p class="text-sm text-zinc-400">Version 1.0 + Setup Guide</p>
+				<h1 class="text-2xl font-bold text-white">Battle Royale DM Command Center</h1>
+				<div class="flex items-center gap-2 text-sm text-slate-400">
+					<span>Battle Royale Manager v1.0</span>
+					<span class="text-slate-600">•</span>
+					<a
+						href="/WUBG-Homebrewery.pdf"
+						target="_blank"
+						class="flex items-center gap-1 text-blue-400 hover:text-blue-300 hover:underline"
+					>
+						📄 Open Rulebook (PDF)
+					</a>
+				</div>
 			</div>
 			<div class="text-4xl">👑</div>
 		</div>
@@ -38,8 +48,12 @@
 					<ul class="list-disc list-outside ml-4 space-y-1">
 						<li>Connect your <strong>Second Monitor</strong> or TV (The "Presenter Screen").</li>
 						<li>
-							Open <code class="bg-zinc-700 px-1 rounded text-white">/presenter</code> in a new browser
-							window.
+							Open <a href="/presenter" target="_blank"
+								><code
+									class="bg-zinc-700 px-1 rounded text-white underline hover:decoration-blue-500 decoration-2 underline-offset-2"
+									>/presenter</code
+								></a
+							> in a new browser window.
 						</li>
 						<li>
 							Drag that window to the second screen and press <kbd
@@ -134,10 +148,20 @@
 						</li>
 						<li>Click <strong class="text-green-400">START GAME</strong> to begin the timer.</li>
 						<li>
-							When the <strong>Warning Countdown</strong> appears (Top Center), click the map in
-							<strong class="text-blue-400">🎯 Zone Mode</strong> to choose the next safe center.
+							<strong>Before</strong> the warning countdown appears, use
+							<strong class="text-blue-400">🎯 Zone Mode</strong> to click the map and set the next safe
+							center.
 						</li>
-						<li>If you don't click, it shrinks concentrically (to the current center).</li>
+						<ul>
+							<li class="pl-4 text-zinc-400 italic">
+								Note: Once the countdown starts, the new ring location is revealed to players on the
+								main screen!
+							</li>
+						</ul>
+						<li>
+							If you don't click, the zone will simply shrink concentrically towards the current
+							center.
+						</li>
 					</ol>
 				</div>
 			</section>
