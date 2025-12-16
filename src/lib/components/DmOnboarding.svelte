@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { fade, scale } from 'svelte/transition';
-  import { asset } from '$app/paths';
+  import { asset, resolve } from '$app/paths';
 
 	type Props = {
 		onClose: () => void;
@@ -49,7 +49,7 @@
 					<ul class="list-disc list-outside ml-4 space-y-1">
 						<li>Connect your <strong>Second Monitor</strong> or TV (The "Presenter Screen").</li>
 						<li>
-							Open <a href="/presenter" target="_blank"
+							Open <a href={resolve('/presenter')} target="_blank"
 								><code
 									class="bg-zinc-700 px-1 rounded text-white underline hover:decoration-blue-500 decoration-2 underline-offset-2"
 									>/presenter</code
