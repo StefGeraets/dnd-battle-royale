@@ -103,16 +103,13 @@
 
 		if (gridX >= 0 && gridX < GRID_SIZE && gridY >= 0 && gridY < GRID_SIZE) {
 			hoverCell = { x: gridX, y: gridY };
-			console.log('SET MOVE', hoverCell);
 		} else {
 			hoverCell = null;
-			console.log('MOVE CANCELED');
 		}
 	}
 
 	function handleMouseLeave() {
 		hoverCell = null;
-		console.log('MOUSE LEAVE');
 	}
 
 	function hexToRgb(hex: string) {

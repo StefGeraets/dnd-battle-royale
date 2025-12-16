@@ -49,6 +49,7 @@
 	// Player movement
 	function handleKeyDown(e: KeyboardEvent) {
 		if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
+		if (e.target instanceof HTMLInputElement) return;
 		const step = 1;
 
 		switch (e.code) {
@@ -63,6 +64,19 @@
 				break;
 			case 'ArrowRight':
 				game.movePlayer(step, 0);
+				break;
+			case 'KeyZ':
+				mode = 'ZONE';
+				break;
+			case 'KeyC':
+				mode = 'CHEST';
+				break;
+			case 'Space':
+				e.preventDefault();
+				game.toggleTimer();
+				break;
+			case 'KeyH':
+				playSound();
 				break;
 		}
 	}
