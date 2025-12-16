@@ -82,7 +82,15 @@
 	}
 </script>
 
-<svelte:window onkeydown={handleKeyDown} />
+<svelte:window
+	onkeydown={handleKeyDown}
+	onbeforeunload={(e) => {
+		if (game.isRunning || game.elapsedTime > 0) {
+			e.preventDefault();
+			e.returnValue = '';
+		}
+	}}
+/>
 
 <div
 	class="flex flex-col h-screen bg-zinc-950 text-white transition-colors duration-1000"
