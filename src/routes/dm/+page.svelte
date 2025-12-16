@@ -6,6 +6,7 @@
 	import CountdownOverlay from '../../lib/components/CountdownOverlay.svelte';
 	import DmOnboarding from '../../lib/components/DmOnboarding.svelte';
 	import { fly, slide } from 'svelte/transition';
+	import { onMount } from 'svelte';
 
 	const game = new GameEngine(true);
 
@@ -13,12 +14,19 @@
 	let lastPlayedIndex = -1;
 	let volume = $state(0.5);
 	let selectedChestId = $state<string | null>(null);
-	let showOnboarding = $state(false); // TODO: Change when live
+	let showOnboarding = $state(true); // TODO: Change when live
 
 	let showSetup = $state(true);
 	let selectedChest = $derived(
 		selectedChestId ? game.specialAreas.find((c) => c.id === selectedChestId) : null
 	);
+
+	onMount(() => {
+		const hasSeen = localStorage.getItem('dm_onboarding_seen');
+		if (hasSeen === 'true') {
+			showOnboarding = false;
+		}
+	});
 
 	$effect(() => {
 		if (game.phase === 'SHRINKING' && game.nextRoundIndex !== lastPlayedIndex) {
@@ -35,6 +43,11 @@
 		return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 	}
 
+	function closeOnboarding() {
+		showOnboarding = false;
+		localStorage.setItem('dm_onboarding_seen', 'true');
+	}
+
 	function playSound() {
 		const audio = new Audio('/warhorn.mp3');
 		audio.volume = volume;
@@ -46,7 +59,7 @@
 		if (id) mode = 'CHEST';
 	}
 
-	// Player movement
+	// Keyboard Shortcuts
 	function handleKeyDown(e: KeyboardEvent) {
 		if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
 		if (e.target instanceof HTMLInputElement) return;
@@ -97,7 +110,7 @@
 	style="background-color: {game.themeColor}"
 >
 	{#if showOnboarding}
-		<DmOnboarding onClose={() => (showOnboarding = false)} />
+		<DmOnboarding onClose={closeOnboarding} />
 	{/if}
 
 	<CountdownOverlay {game} />

@@ -211,6 +211,20 @@
 		/>
 
 		<g transform="translate({metrics.x}, {metrics.y}) scale({metrics.s / 100})">
+			{#if isDm && hoverCell}
+				<rect
+					x={hoverCell.x * CELL_SIZE}
+					y={hoverCell.y * CELL_SIZE}
+					width={mode === 'CHEST' ? CELL_SIZE * 2 : CELL_SIZE}
+					height={mode === 'CHEST' ? CELL_SIZE * 2 : CELL_SIZE}
+					fill={mode === 'CHEST' ? '#facc15' : '#3b82f6'}
+					fill-opacity="0.1"
+					stroke={mode === 'CHEST' ? '#facc15' : '#3b82f6'}
+					stroke-width="0.2"
+					stroke-opacity="0.5"
+					class="pointer-events-none transition-all duration-75"
+				/>
+			{/if}
 			<!-- grid lines -->
 			<g stroke="white" stroke-opacity="0.15" stroke-width="0.1">
 				{#each Array(GRID_SIZE + 1) as _, i}
@@ -276,23 +290,6 @@
 					<text x="10" y="4" font-size="3" text-anchor="middle" fill="white" font-weight="bold"
 						>HIDDEN</text
 					>
-				</g>
-			{/if}
-
-			{#if isDm && hoverCell}
-				<g>
-					<rect
-						x={hoverCell.x * CELL_SIZE}
-						y={hoverCell.y * CELL_SIZE}
-						width={mode === 'CHEST' ? CELL_SIZE * 2 : CELL_SIZE}
-						height={mode === 'CHEST' ? CELL_SIZE * 2 : CELL_SIZE}
-						fill={mode === 'CHEST' ? '#facc15' : '#3b82f6'}
-						fill-opacity="0.1"
-						stroke={mode === 'CHEST' ? '#facc15' : '#3b82f6'}
-						stroke-width="0.2"
-						stroke-opacity="0.5"
-						class="pointer-events-none transition-all duration-75"
-					/>
 				</g>
 			{/if}
 

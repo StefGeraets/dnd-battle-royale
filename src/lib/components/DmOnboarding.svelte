@@ -24,12 +24,14 @@
 		</div>
 
 		<div class="overflow-y-auto p-6 space-y-8 text-zinc-300">
+			<!-- 1. Hardware setup -->
 			<section class="space-y-3">
 				<h2 class="flex items-center gap-2 text-lg font-bold text-yellow-500">
 					<span
 						class="flex h-6 w-6 items-center justify-center rounded-full bg-yellow-600/20 text-xs ring-1 ring-yellow-600"
-						>1</span
 					>
+						1
+					</span>
 					Hardware & Display Setup
 				</h2>
 				<div class="ml-8 space-y-2 text-sm bg-zinc-800/50 p-4 rounded border border-zinc-800">
@@ -49,13 +51,14 @@
 				</div>
 			</section>
 
+			<!-- 2. Game Setup -->
 			<section class="space-y-3">
 				<h2 class="flex items-center gap-2 text-lg font-bold text-blue-400">
 					<span
 						class="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600/20 text-xs ring-1 ring-blue-600"
 						>2</span
 					>
-					Game Configuration
+					Game Configuration & Visuals
 				</h2>
 				<div class="ml-8 text-sm">
 					<p class="mb-2">
@@ -65,62 +68,63 @@
 					<ul class="grid grid-cols-1 md:grid-cols-2 gap-3">
 						<li class="bg-zinc-800 p-2 rounded border border-zinc-700">
 							<strong class="text-white block">⏱ Total Duration</strong>
-							Set the game length (e.g., 2.5 hours). The Shrink Schedule is automatically calculated from
-							this.
+							Set the game length (e.g., 2.5 hours). The shrink schedule generates automatically based
+							on this.
 						</li>
 						<li class="bg-zinc-800 p-2 rounded border border-zinc-700">
-							<strong class="text-white block">🎨 Map & Theme</strong>
-							Choose a map preset and a Storm Theme (Fire, Ice, Toxic, etc.).
+							<strong class="text-white block">🎨 Map & Atmosphere</strong>
+							Select a <strong>Map Preset</strong> (Forest, Ruins, etc.) and a
+							<strong>Storm Theme</strong> (Fire, Ice, Toxic) to match your campaign.
 						</li>
 					</ul>
 				</div>
 			</section>
 
+			<!-- 3. Interactions -->
 			<section class="space-y-3">
-				<h2 class="flex items-center gap-2 text-lg font-bold text-green-500">
+				<h2 class="flex items-center gap-2 text-lg font-bold text-green-400">
 					<span
 						class="flex h-6 w-6 items-center justify-center rounded-full bg-green-600/20 text-xs ring-1 ring-green-600"
 						>3</span
 					>
-					Loot & Special Areas
+					Interaction Modes
 				</h2>
 				<div class="ml-8 space-y-3 text-sm">
-					<p>
-						Switch the Interaction Mode to <strong
-							class="text-yellow-400 bg-yellow-900/30 px-1 rounded">🎁 Chest</strong
-						>.
-					</p>
 					<div class="grid gap-3">
-						<div class="flex gap-3 items-start">
+						<div class="flex items-start gap-3">
 							<div
-								class="bg-zinc-800 p-2 rounded min-w-[60px] text-center text-xs font-bold border border-zinc-600"
+								class="min-w-20 rounded border border-blue-900 bg-blue-900/20 p-2 text-center text-xs font-bold text-blue-400"
 							>
-								Click Empty
-							</div>
-							<p>Creates a new <strong>2x2 Special Area</strong> (Chest) at that location.</p>
-						</div>
-						<div class="flex gap-3 items-start">
-							<div
-								class="bg-zinc-800 p-2 rounded min-w-[60px] text-center text-xs font-bold border border-zinc-600"
-							>
-								Click Chest
+								🎯 ZONE
 							</div>
 							<p>
-								Selects the chest. An <strong>Edit Panel</strong> will appear in the sidebar
-								allowing you to <span class="text-white">Rename</span> or
-								<span class="text-red-400">Delete</span> it.
+								Click the map to set the <strong>Center</strong> for the next safe zone. You can only
+								move the target while the ring is stationary (not shrinking).
 							</p>
+						</div>
+						<div class="flex items-start gap-3">
+							<div
+								class="min-w-20 rounded border border-yellow-900 bg-yellow-900/20 p-2 text-center text-xs font-bold text-yellow-500"
+							>
+								🎁 CHEST
+							</div>
+							<div>
+								<p class="mb-1">Click an empty square to place a <strong>2x2 Loot Area</strong>.</p>
+								<p>Click an <strong>existing chest</strong> to Rename or Delete it.</p>
+							</div>
 						</div>
 					</div>
 				</div>
 			</section>
 
+			<!-- 4. Running the game -->
 			<section class="space-y-3">
 				<h2 class="flex items-center gap-2 text-lg font-bold text-red-500">
 					<span
 						class="flex h-6 w-6 items-center justify-center rounded-full bg-red-600/20 text-xs ring-1 ring-red-600"
-						>4</span
 					>
+						4
+					</span>
 					Running the Game
 				</h2>
 				<div class="ml-8 text-sm bg-zinc-800/50 p-4 rounded border border-zinc-800">
@@ -135,6 +139,44 @@
 						</li>
 						<li>If you don't click, it shrinks concentrically (to the current center).</li>
 					</ol>
+				</div>
+			</section>
+
+			<!-- 5. Shortcuts -->
+			<section class="space-y-3">
+				<h2 class="flex items-center gap-2 text-lg font-bold text-purple-400">
+					<span
+						class="flex h-6 w-6 items-center justify-center rounded-full bg-purple-600/20 text-xs ring-1 ring-purple-600"
+					>
+						5
+					</span>
+					Keyboard Shortcuts
+				</h2>
+				<div class="ml-8 grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
+					<div class="rounded bg-zinc-800 p-3 text-center border border-zinc-700">
+						<kbd class="rounded bg-zinc-700 px-2 py-1 font-mono text-white border border-zinc-600"
+							>SPACE</kbd
+						>
+						<div class="mt-2 text-xs text-zinc-400">Start / Pause</div>
+					</div>
+					<div class="rounded bg-zinc-800 p-3 text-center border border-zinc-700">
+						<kbd class="rounded bg-zinc-700 px-2 py-1 font-mono text-white border border-zinc-600"
+							>Z</kbd
+						>
+						<div class="mt-2 text-xs text-zinc-400">Zone Mode</div>
+					</div>
+					<div class="rounded bg-zinc-800 p-3 text-center border border-zinc-700">
+						<kbd class="rounded bg-zinc-700 px-2 py-1 font-mono text-white border border-zinc-600"
+							>C</kbd
+						>
+						<div class="mt-2 text-xs text-zinc-400">Chest Mode</div>
+					</div>
+					<div class="rounded bg-zinc-800 p-3 text-center border border-zinc-700">
+						<kbd class="rounded bg-zinc-700 px-2 py-1 font-mono text-white border border-zinc-600"
+							>ARROWS</kbd
+						>
+						<div class="mt-2 text-xs text-zinc-400">Move Party</div>
+					</div>
 				</div>
 			</section>
 		</div>
