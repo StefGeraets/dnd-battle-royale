@@ -100,7 +100,8 @@ export class GameEngine {
   #setupDm() {
     // Initialize worker
     try {
-      this.#worker = new Worker('/time-worker.js');
+      // eslint-disable-next-line svelte/prefer-svelte-reactivity
+      this.#worker = new Worker(new URL('./time-worker.ts', import.meta.url), { type: 'module' });
       this.#worker.onerror = (err) => console.error('[GameEngine] Worker Error', err);
       this.#worker.onmessage = () => this.#tick();
     } catch (e) {
