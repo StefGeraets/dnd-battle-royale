@@ -1,0 +1,59 @@
+name: Deploy to Github Pages
+
+on:
+  push:
+    branches: 'main'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{steps.deployment.outputs.page_url}}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+      
+      - name: Install Dependencies
+        run: bun ci
+      
+      - name: Build
+        run: bun run build
+      
+      # ADD THIS STEP TO DEBUG
+      - name: List build files
+        run: ls -R build
+      
+      # Fix for GH Pages
+      - name: Add .nojekyll file
+        run: touch build/.nojekyll
+
+      # --- ADD THIS DEBUG STEP ---
+      - name: Check for Symlinks
+        run: |
+          echo "Checking for symlinks in build directory..."
+          find build -type l
+          echo "Listing build directory contents..."
+          ls -R build
+      # ---------------------------
+      
+      - name: Upload artifacts
+        uses: actions/upload-pages-artifact@v3
+        with:
+          name: github-pages
+          path: 'build'
+        
+      - name: Deploy to GH Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
