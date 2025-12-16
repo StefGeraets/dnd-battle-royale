@@ -33,7 +33,7 @@
 	// }
 </script>
 
-<div class="rounded border border-zinc-700 bg-zinc-900 p-4 shadow-lg space-y-4">
+<div class="rounded bg-zinc-900 shadow-lg space-y-4">
 	<h2 class="flex justify-between text-xs font-bold uppercase tracking-wider text-gray-400">
 		<span>Map & Atmosphere</span>
 		{#if isLocked}
@@ -80,7 +80,7 @@
 		</div>
 	</div>
 
-	<div
+	<!-- <div
 		class="relative rounded border border-zinc-700 border-dashed p-4 text-center opacity-75 {isLocked
 			? 'opacity-30'
 			: ''}"
@@ -119,7 +119,7 @@
 				<span class="text-xs text-zinc-400">Background Tint</span>
 			</div>
 		</details>
-	</div>
+	</div> -->
 
 	{#if isLocked}
 		<div class="mt-2 rounded bg-zinc-800 p-2 text-center text-[10px] text-zinc-400">

@@ -104,8 +104,12 @@
 			{#if showSetup}
 				<div
 					transition:slide
-					class="rounded border border-zinc-700/50 bg-zinc-900 p-4 shadow-lg space-y-4"
+					class="rounded border border-yellow-700/50 bg-zinc-900 p-4 shadow-lg space-y-4"
 				>
+					<h2 class="text-[10px] font-bold uppercase tracking-wider text-yellow-500 mb-2">
+						Pre-Game Configuration
+					</h2>
+
 					<div class={game.elapsedTime > 0 ? 'opacity-50' : ''}>
 						<label for="gameHours" class="block text-xs text-zinc-400 mb-1">
 							Total Game Duration (Hours)
@@ -128,7 +132,27 @@
 						</div>
 					</div>
 
-					<div>
+					<div class="pt-2 border-t border-zinc-700">
+						<MapSettings {game} />
+					</div>
+
+					<div class="pt-2 border-t border-zinc-700/50 {game.elapsedTime > 0 ? 'opacity-50' : ''}">
+						<!-- svelte-ignore a11y_label_has_associated_control -->
+						<label class="mb-1 block text-xs text-zinc-400">Preparation</label>
+						<button
+							class="w-full py-2 px-3 rounded text-sm font-bold bg-zinc-700 hover:bg-zinc-600 text-zinc-200 flex items-center justify-center gap-2"
+							onclick={() => (mode = 'CHEST')}
+						>
+							🎁 Place Loot Chests
+						</button>
+						{#if mode === 'CHEST'}
+							<p class="text-[10px] text-yellow-500/80 mt-1 text-center animate-pulse">
+								Click empty grid cells to add chests.
+							</p>
+						{/if}
+					</div>
+
+					<div class="pt-2 border-t border-zinc-700/50">
 						<!-- svelte-ignore a11y_label_has_associated_control -->
 						<label class="block text-xs text-zinc-400 mb-1">Presenter Screen</label>
 						<button
@@ -160,10 +184,6 @@
 								class="flex-1 h-1 bg-zinc-600 rounded-lg appearance-none cursor-pointer"
 							/>
 						</div>
-					</div>
-
-					<div class="pt-2 border-t border-zinc-700">
-						<MapSettings {game} />
 					</div>
 				</div>
 			{/if}
@@ -248,8 +268,8 @@
 							? 'bg-yellow-600 hover:bg-yellow-500'
 							: 'bg-green-600 hover:bg-green-500'}"
 						onclick={() => {
+							if (!game.isRunning && game.elapsedTime === 0) showSetup = false;
 							game.toggleTimer();
-							showSetup = false;
 						}}
 					>
 						{game.isRunning ? 'PAUSE CLOCK' : 'START CLOCK'}
