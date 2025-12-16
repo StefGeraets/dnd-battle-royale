@@ -22,6 +22,7 @@
 	let metrics = $state({ x: 0, y: 0, s: 1 }); // Default to 1 to avoid div/0
 	let theme = $derived(STORM_THEMES[game.stormThemeId] || STORM_THEMES['fire']);
 	let stormRgb = $derived(hexToRgb(theme.primary));
+	let hoverCell = $state<{ x: number; y: number } | null>(null);
 
 	function updateMetrics() {
 		if (mapImageEl) {
@@ -50,8 +51,6 @@
 		// 1. Calculate click relative to the IMAGE (metrics), not the screen
 		const relX = e.clientX - metrics.x;
 		const relY = e.clientY - metrics.y;
-
-		const rect = (e.currentTarget as SVGSVGElement)?.getBoundingClientRect();
 
 		// 2. Convert to 0-100 scale
 		const scaleX = (relX / metrics.s) * 100;
@@ -83,6 +82,37 @@
 			const centerY = gridY * CELL_SIZE + CELL_SIZE / 2;
 			game.setNextZoneCenter(centerX, centerY);
 		}
+	}
+
+	function handleMouseMove(e: MouseEvent) {
+		if (!isDm) return;
+
+		// 1. Calculate click relative to the IMAGE (metrics), not the screen
+		const relX = e.clientX - metrics.x;
+		const relY = e.clientY - metrics.y;
+
+		// 2. Convert to 0-100 scale
+		const scaleX = (relX / metrics.s) * 100;
+		const scaleY = (relY / metrics.s) * 100;
+
+		// 3. Ignore clicks outside the actual map image area
+		if (scaleX < 0 || scaleX > 100 || scaleY < 0 || scaleY > 100) return;
+
+		const gridX = Math.floor(scaleX / CELL_SIZE);
+		const gridY = Math.floor(scaleY / CELL_SIZE);
+
+		if (gridX >= 0 && gridX < GRID_SIZE && gridY >= 0 && gridY < GRID_SIZE) {
+			hoverCell = { x: gridX, y: gridY };
+			console.log('SET MOVE', hoverCell);
+		} else {
+			hoverCell = null;
+			console.log('MOVE CANCELED');
+		}
+	}
+
+	function handleMouseLeave() {
+		hoverCell = null;
+		console.log('MOUSE LEAVE');
 	}
 
 	function hexToRgb(hex: string) {
@@ -117,6 +147,8 @@
 			? 'cursor-crosshair pointer-events-auto'
 			: 'pointer-events-none'}"
 		onclick={handleMapClick}
+		onmousemove={handleMouseMove}
+		onmouseleave={handleMouseLeave}
 		role="application"
 	>
 		<defs>
@@ -194,7 +226,10 @@
 
 			<!-- special areas -->
 			{#each game.specialAreas as area}
-				<g transform="translate({area.x * CELL_SIZE}, {area.y * CELL_SIZE})" class="outline-0">
+				<g
+					transform="translate({area.x * CELL_SIZE}, {area.y * CELL_SIZE})"
+					class="outline-0 cursor-pointer"
+				>
 					<rect
 						width={CELL_SIZE * 2}
 						height={CELL_SIZE * 2}
@@ -244,6 +279,23 @@
 					<text x="10" y="4" font-size="3" text-anchor="middle" fill="white" font-weight="bold"
 						>HIDDEN</text
 					>
+				</g>
+			{/if}
+
+			{#if isDm && hoverCell}
+				<g>
+					<rect
+						x={hoverCell.x * CELL_SIZE}
+						y={hoverCell.y * CELL_SIZE}
+						width={mode === 'CHEST' ? CELL_SIZE * 2 : CELL_SIZE}
+						height={mode === 'CHEST' ? CELL_SIZE * 2 : CELL_SIZE}
+						fill={mode === 'CHEST' ? '#facc15' : '#3b82f6'}
+						fill-opacity="0.1"
+						stroke={mode === 'CHEST' ? '#facc15' : '#3b82f6'}
+						stroke-width="0.2"
+						stroke-opacity="0.5"
+						class="pointer-events-none transition-all duration-75"
+					/>
 				</g>
 			{/if}
 
