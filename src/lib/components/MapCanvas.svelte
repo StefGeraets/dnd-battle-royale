@@ -176,15 +176,13 @@
 			<mask id="fsStormMask">
 				<rect x="0" y="0" width="100%" height="100%" fill="white" />
 
-				<g transform="translate({metrics.x}, {metrics.y})">
-					<g transform="scale({metrics.s / 100})">
-						<circle
-							cx={game.currentZone.x}
-							cy={game.currentZone.y}
-							r={game.currentZone.r}
-							fill="url(#fadeEdge)"
-						/>
-					</g>
+				<g transform="translate({metrics.x}, {metrics.y}) scale({metrics.s / 100})">
+					<circle
+						cx={game.currentZone.x}
+						cy={game.currentZone.y}
+						r={game.currentZone.r}
+						fill="url(#fadeEdge)"
+					/>
 				</g>
 			</mask>
 		</defs>
@@ -197,7 +195,7 @@
 			fill={theme.primary}
 			mask="url(#fsStormMask)"
 			filter="url(#storm-fog)"
-			class="opacity-90 transition-colors duration-1000"
+			class="opacity-90 transition-colors duration-1000 will-change-auto"
 		/>
 		<rect
 			x="0"
@@ -207,7 +205,7 @@
 			fill={theme.secondary}
 			fill-opacity="0.5"
 			mask="url(#fsStormMask)"
-			class="transition-colors duration-1000"
+			class="transition-colors duration-1000 will-change-auto"
 		/>
 
 		<g transform="translate({metrics.x}, {metrics.y}) scale({metrics.s / 100})">
@@ -222,7 +220,7 @@
 					stroke={mode === 'CHEST' ? '#facc15' : '#3b82f6'}
 					stroke-width="0.2"
 					stroke-opacity="0.5"
-					class="pointer-events-none transition-all duration-75"
+					class="pointer-events-none transition-all duration-75 will-change-auto"
 				/>
 			{/if}
 			<!-- grid lines -->
@@ -301,7 +299,7 @@
 				stroke={theme.accent}
 				stroke-width="0.5"
 				filter="url(#glow)"
-				class="transition-colors duration-1000"
+				class="transition-colors duration-1000 will-change-auto"
 			/>
 
 			<g
@@ -309,7 +307,7 @@
                 {game.playerPos.x * CELL_SIZE + CELL_SIZE / 2}, 
                 {game.playerPos.y * CELL_SIZE + CELL_SIZE / 2}
             )"
-				class="transition-transform duration-150"
+				class="transition-transform duration-150 will-change-transform"
 			>
 				<circle r={Math.min(CELL_SIZE, CELL_SIZE) * 0.35} fill="black" opacity="0.5" cy="0.5" />
 				<circle

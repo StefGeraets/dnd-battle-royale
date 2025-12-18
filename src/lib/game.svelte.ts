@@ -7,9 +7,41 @@ export type Point = {x: number; y: number };
 export type Zone = { x: number; y: number; r: number };
 export type SpecialArea = { id: string; x: number; y: number; name: string };
 export type GamePhase = 'IDLE' | 'WARNING' | 'SHRINKING' | 'STABLE';
+export type KillEvent = {id: string, msg: string, timestamp: number };
 
 const SYNC_CHANNEL = 'dnd_royale_sync';
 const SAVE_KEY = 'dnd_royale_save_v1';
+const MAX_FEED_ITEMS = 5;
+const INITIAL_COMBATANTS = 100;
+const FINAL_SURVIVORS = 2;
+
+// Random Data Pools
+const NAMES = [
+    "Azog", "Gimli", "Legolas", "Thranduil", "Boromir", "Lurtz", "Gandalf", "Saruman",
+    "Frodo", "Sam", "Merry", "Pippin", "Aragorn", "Gollum", "Sauron", "Galadriel",
+    "Elrond", "Arwen", "Eowyn", "Faramir", "Denethor", "Theoden", "Eomer", "Grima",
+    "Grognak", "Vex", "Percy", "Grog", "Scanlan", "Pike", "Keyleth", "Vax", "Taryon",
+    "Jester", "Fjord", "Yasha", "Beau", "Caleb", "Nott", "Mollymauk", "Caduceus",
+    "Unknown Soldier", "Goblin #42", "Town Guard", "Angry Peasant"
+];
+
+const KILL_TEMPLATES = [
+    "{A} decapitated {V}",
+    "{A} incinerated {V}",
+    "{A} evaporated {V}",
+    "{A} crushed {V} with a rock",
+    "{A} backstabbed {V}",
+    "{A} pushed {V} into the storm",
+    "{A} sniped {V} from 300ft",
+    "{A} melted {V}",
+    "{A} blasted {V} off a cliff",
+    "{A} betrayed {V}",
+    "{A} ambushed {V}",
+    "{A} fed {V} to a mimic",
+    "{A} cast Power Word Kill on {V}",
+    "{A} threw {V} into lava",
+    "{V} stepped on {A}'s trap" // A passive kill example
+];
 
 export class GameEngine {
   // REACTIVE STATE //
@@ -35,6 +67,10 @@ export class GameEngine {
   isPresenterHidden = $state(true);
   schedule = $state(generateSchedule(2.5));
   nextRoundIndex = $state(0);
+
+  // Combatants feed
+  remainingCombatants = $state(INITIAL_COMBATANTS);
+  killFeed = $state<KillEvent[]>([]);
 
   // Visual config
   mapImage = $state(asset('/islands.jpg'));
@@ -81,6 +117,8 @@ export class GameEngine {
   #isDm: boolean;
   #channel: BroadcastChannel | null = null;
   #worker: Worker | null = null;
+
+  #killsTriggered = 0;
 
   constructor(isDm: boolean = false) {
     this.#isDm = isDm;
@@ -152,6 +190,10 @@ export class GameEngine {
       if (progress >= 1) {
         this.finishShrink();
       }
+    }
+
+    if (this.remainingCombatants > FINAL_SURVIVORS) {
+      this.checkKillPacing();
     }
 
     this.#broadcast();
@@ -276,6 +318,43 @@ export class GameEngine {
     this.nextRoundIndex++;
   }
 
+  checkKillPacing() {
+    const totalDeathsNeeded = INITIAL_COMBATANTS - FINAL_SURVIVORS;
+    const totalDurationMs = this.totalGameHours * 60 * 60 * 1000;
+    const msPerDeath = totalDurationMs / totalDeathsNeeded;
+    const targetDeaths = Math.floor(this.elapsedTime / msPerDeath);
+
+    if (this.#killsTriggered < targetDeaths) {
+      this.triggerRandomKill();
+    }
+  }
+
+  triggerRandomKill() {
+    const attacker = NAMES[Math.floor(Math.random() * NAMES.length)];
+    let victim = NAMES[Math.floor(Math.random() * NAMES.length)];
+    
+    while (attacker === victim) {
+      victim = NAMES[Math.floor(Math.random() * NAMES.length)];
+    };
+    
+    const template = KILL_TEMPLATES[Math.floor(Math.random() * KILL_TEMPLATES.length)];
+
+    const aHtml = `<span class="text-yellow-500 font-bold">${attacker}</span>`;
+    const vHtml = `<span class="text-red-400 font-bold">${victim}</span>`;
+    
+    const msg = template.replace(/{A}/g, aHtml).replace(/{V}/g, vHtml);
+
+    const newKill: KillEvent = {
+      id: `${Date.now()}-${Math.floor(Math.random() * 1000000000)}`,
+      msg,
+      timestamp: Date.now()
+    }
+
+    this.killFeed = [newKill, ...this.killFeed].slice(0, MAX_FEED_ITEMS);
+    this.remainingCombatants--;
+    this.#killsTriggered++;
+  }
+
   setStormTheme(id: string) {
     if (!this.#isDm) return;
     if (STORM_THEMES[id]) {
@@ -320,7 +399,28 @@ export class GameEngine {
 
     localStorage.removeItem(SAVE_KEY);
 
-    window.location.reload();
+    this.elapsedTime = 0;
+    this.isRunning = false;
+    this.phase = 'IDLE';
+    this.shrinkStartTime = 0;
+    this.shrinkDuration = 3000;
+    this.secondsUntilShrink = 0;
+    this.nextRoundIndex = -1;
+    this.mapImage = asset('/islands.jpg');
+    this.themeColor = '#3C5D68';
+    this.stormThemeId = 'fire';
+    this.totalGameHours = 2.5;
+    this.isPresenterHidden = true;
+    this.remainingCombatants = INITIAL_COMBATANTS;
+    this.schedule = generateSchedule(2.5);
+    this.specialAreas = [];
+    this.playerPos = {x: 1, y: 1};
+    this.activeZone = {x: 50, y: 50, r: 150};
+    this.targetZone = {x: 50, y: 50, r: 150};
+    this.killFeed = [];
+    this.#killsTriggered = 0;
+
+    // window.location.reload();
   }
 
   #broadcast() {
@@ -339,11 +439,14 @@ export class GameEngine {
         stormThemeId: this.stormThemeId,
         totalGameHours: this.totalGameHours,
         isPresenterHidden: this.isPresenterHidden,
+        remainingCombatants: this.remainingCombatants,
         schedule: $state.snapshot(this.schedule),
         specialAreas: $state.snapshot(this.specialAreas),
         playerPos: $state.snapshot(this.playerPos),
         activeZone: $state.snapshot(this.activeZone),
         targetZone: $state.snapshot(this.targetZone),
+        killFeed: $state.snapshot(this.killFeed),
+        killsTriggered: this.#killsTriggered,
     };
 
     this.#channel?.postMessage(payload);
@@ -362,6 +465,8 @@ export class GameEngine {
       phase: this.phase,
       totalGameHours: this.totalGameHours,
       isPresenterHidden: this.isPresenterHidden,
+      remainingCombatants: this.remainingCombatants,
+      killFeed: this.killFeed,
       schedule: this.schedule,
       shrinkStartTime: this.shrinkStartTime,
       shrinkDuration: this.shrinkDuration,
@@ -370,7 +475,8 @@ export class GameEngine {
       mapImage: this.mapImage,
       themeColor: this.themeColor,
       stormThemeId: this.stormThemeId,
-      timestamp: Date.now()
+      killsTriggered: this.#killsTriggered,
+      timestamp: Date.now(),
     }
 
     localStorage.setItem(SAVE_KEY, JSON.stringify(data));
@@ -403,6 +509,9 @@ export class GameEngine {
       this.themeColor = data.themeColor || this.themeColor;
       this.stormThemeId = data.stormThemeId || this.stormThemeId;
       this.specialAreas = data.specialAreas || [];
+      this.remainingCombatants = data.remainingCombatants || INITIAL_COMBATANTS;
+      this.killFeed = data.killFeed || [];
+      this.#killsTriggered = data.killsTriggered;
       
       // Note: We do NOT restore 'isRunning'. 
       // It is safer to start PAUSED after a reload so the DM can get their bearings.
@@ -440,6 +549,9 @@ export class GameEngine {
       this.playerPos = d.playerPos;
       this.activeZone = d.activeZone;
       this.targetZone = d.targetZone;
+      this.remainingCombatants = d.remainingCombatants;
+      this.killFeed = d.killFeed || [];
+      this.#killsTriggered = d.killsTriggered || 0;
     }
   }
 }

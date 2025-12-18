@@ -117,3 +117,5 @@ export const MAP_PRESETS = [
   //   color: '#451a03' 
   // }
 ];
+
+export const DONATION_URL = "https://buymeacoffee.com/StefBuilds";

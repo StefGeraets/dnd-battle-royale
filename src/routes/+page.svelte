@@ -8,6 +8,8 @@
 	import { fly, slide } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import { asset } from '$app/paths';
+	import BuyCoffeeToast from '$lib/components/BuyCoffeeToast.svelte';
+	import KillFeed from '../lib/components/KillFeed.svelte';
 
 	const game = new GameEngine(true);
 
@@ -15,12 +17,15 @@
 	let lastPlayedIndex = -1;
 	let volume = $state(0.5);
 	let selectedChestId = $state<string | null>(null);
-	let showOnboarding = $state(true); // TODO: Change when live
+	let showOnboarding = $state(true);
+	let showDonationPopup = $state(false);
+	let donationPopupSeen = $state(false);
 
 	let showSetup = $state(true);
 	let selectedChest = $derived(
 		selectedChestId ? game.specialAreas.find((c) => c.id === selectedChestId) : null
 	);
+	let isGameOver = $derived(!game.nextRound && game.elapsedTime > 0);
 
 	onMount(() => {
 		const hasSeen = localStorage.getItem('dm_onboarding_seen');
@@ -33,6 +38,15 @@
 		if (game.phase === 'SHRINKING' && game.nextRoundIndex !== lastPlayedIndex) {
 			playSound();
 			lastPlayedIndex = game.nextRoundIndex;
+		}
+	});
+
+	$effect(() => {
+		if (isGameOver && !donationPopupSeen) {
+			const timer = setTimeout(() => {
+					showDonationPopup = true;
+			}, 1000 * 60 * 5);  // Wait 5 minutes after last shrink to show the popup
+			return () => clearTimeout(timer);
 		}
 	});
 
@@ -113,6 +127,17 @@
 	{#if showOnboarding}
 		<DmOnboarding onClose={closeOnboarding} />
 	{/if}
+
+	{#if showDonationPopup}
+		<BuyCoffeeToast
+			onClose={() => {
+				showDonationPopup = false;
+				donationPopupSeen = true; // Don't show again this session
+			}}
+		/>
+	{/if}
+
+	<KillFeed {game} />
 
 	<CountdownOverlay {game} />
 
