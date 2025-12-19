@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fade, scale } from 'svelte/transition';
   import { asset, resolve } from '$app/paths';
+	import { APP_VERSION } from '../app-metadata';
 
 	type Props = {
 		onClose: () => void;
@@ -20,7 +21,7 @@
 			<div>
 				<h1 class="text-2xl font-bold text-white">Battle Royale DM Command Center</h1>
 				<div class="flex items-center gap-2 text-sm text-slate-400">
-					<span>Battle Royale Manager v1.0</span>
+					<span>Battle Royale Manager v{APP_VERSION}</span>
 					<span class="text-slate-600">•</span>
 					<a
 						href={asset('/WUBG-Homebrewery.pdf')}

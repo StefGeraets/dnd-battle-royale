@@ -9,7 +9,8 @@
 	import { onMount } from 'svelte';
 	import { asset } from '$app/paths';
 	import BuyCoffeeToast from '$lib/components/BuyCoffeeToast.svelte';
-	import KillFeed from '../lib/components/KillFeed.svelte';
+	import KillFeed from '$lib/components/KillFeed.svelte';
+	import VersionOverlay from '$lib/components/VersionOverlay.svelte';
 
 	const game = new GameEngine(true);
 
@@ -127,6 +128,8 @@
 	{#if showOnboarding}
 		<DmOnboarding onClose={closeOnboarding} />
 	{/if}
+
+	<VersionOverlay />
 
 	{#if showDonationPopup}
 		<BuyCoffeeToast
