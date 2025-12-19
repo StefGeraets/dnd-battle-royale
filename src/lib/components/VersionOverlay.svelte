@@ -8,6 +8,7 @@
 	const STORAGE_KEY = 'dm_version_seen';
 
 	let show = $state(false);
+	let showAllReleases = $state(false);
 
 	onMount(() => {
 		try {
@@ -73,9 +74,9 @@
 					</button>
 				</div>
 
-				<!-- All releases, newest first -->
+				<!-- Releases: show latest by default, all when expanded -->
 				<div class="space-y-2">
-					{#each RELEASES as release, i}
+					{#each showAllReleases ? RELEASES : [latestRelease] as release, i}
 						<div
 							class={`rounded-lg border p-2 ${
 								i === 0
@@ -88,7 +89,7 @@
 									<span class="font-mono text-md font-semibold text-zinc-100">
 										v{release.version}
 									</span>
-									{#if i === 0}
+									{#if release.version === latestRelease.version}
 										<span
 											class="rounded-full bg-emerald-600/20 px-2 py-px text-[10px] font-semibold uppercase tracking-wide text-emerald-300"
 											>Latest</span
@@ -148,6 +149,23 @@
 						</div>
 					{/each}
 				</div>
+
+				<!-- Toggle to show all releases -->
+				{#if !showAllReleases && RELEASES.length > 1}
+					<button
+						class="w-full rounded-lg border border-zinc-700 bg-zinc-900/60 px-3 py-2 text-xs text-zinc-400 hover:border-zinc-600 hover:text-zinc-200 hover:bg-zinc-900 transition-colors cursor-pointer"
+						onclick={() => (showAllReleases = true)}
+					>
+						View all {RELEASES.length} releases ↓
+					</button>
+				{:else if showAllReleases}
+					<button
+						class="w-full rounded-lg border border-zinc-700 bg-zinc-900/60 px-3 py-2 text-xs text-zinc-400 hover:border-zinc-600 hover:text-zinc-200 hover:bg-zinc-900 transition-colors cursor-pointer"
+						onclick={() => (showAllReleases = false)}
+					>
+						Show only latest release ↑
+					</button>
+				{/if}
 
 				<!-- Global roadmap, shown once -->
 				{#if roadmapStatus.length}
