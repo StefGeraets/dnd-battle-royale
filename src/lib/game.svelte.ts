@@ -75,7 +75,7 @@ export class GameEngine {
   killFeed = $state<KillEvent[]>([]);
 
   // Visual config
-  mapImage = $state(asset('/islands.jpg'));
+  mapImage = $state(asset('/islands.webp'));
   themeColor = $state('#3C5D68');
   stormThemeId = $state('fire');
   specialAreas = $state<SpecialArea[]>([]);

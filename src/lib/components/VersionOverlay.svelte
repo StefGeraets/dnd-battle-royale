@@ -52,7 +52,7 @@
 			transition:fly={{ y: -20, duration: 200 }}
 		>
 			<div
-				class="rounded-2xl border border-zinc-700 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur-sm text-xs text-zinc-100 space-y-3"
+				class="rounded-lg border border-zinc-700 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur-sm text-xs text-zinc-100 space-y-3"
 			>
 				<div class="mb-2 flex items-start justify-between gap-2">
 					<div>
