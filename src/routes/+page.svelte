@@ -264,7 +264,7 @@
 				</div>
 			{/if}
 
-			<div class="overflow-hidden rounded border border-zinc-700 bg-zinc-900 shadow-xl">
+			<div class="rounded border border-zinc-700 bg-zinc-900 shadow-xl">
 				<div
 					class="flex itemx-center justify-between border-b border-zinc-800 bg-zinc-950 px-4 py-2"
 				>
