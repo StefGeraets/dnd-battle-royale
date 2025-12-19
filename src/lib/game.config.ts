@@ -101,20 +101,26 @@ export const MAP_PRESETS = [
   { 
     id: 'islands', 
     label: 'Rayrock Isles', 
-    url: asset('/islands.jpg'), 
+    url: asset('/islands.webp'), 
     color: '#3C5D68' 
   },
+  { 
+    id: 'lava', 
+    label: 'Moltenrock Peaks', 
+    url: asset('/marwen.webp'), 
+    color: '#FFE900' 
+  },
+  { 
+    id: 'lake', 
+    label: 'Northern Lakes', 
+    url: asset('/lakes.webp'), 
+    color: '#CAA86B' 
+  },
   // { 
-  //   id: 'forest', 
-  //   label: 'Deep Forest', 
-  //   url: asset('https://placehold.co/1000x1000/064e3b/FFF?text=Forest'), 
-  //   color: '#064e3b' 
-  // },
-  // { 
-  //   id: 'desert', 
-  //   label: 'Scorched Desert', 
-  //   url: asset('https://placehold.co/1000x1000/78350f/FFF?text=Desert'), 
-  //   color: '#451a03' 
+  //   id: 'ice', 
+  //   label: 'Fjord Blizzard', 
+  //   url: asset('/fjord.webp'), 
+  //   color: '#3D4E65' // water #3D4E65, ice: #F0ECE9
   // }
 ];
 

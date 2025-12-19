@@ -144,7 +144,6 @@
 		src={game.mapImage}
 		alt="Battle Map"
 		class="max-h-screen max-w-full shadow-2xl transition-opacity duration-500 aspect-square object-cover"
-		style="opacity: 0.8;"
 		onload={updateMetrics}
 	/>
 
@@ -252,7 +251,7 @@
 				height="100%"
 				fill={theme.primary}
 				mask="url(#fsStormMaskSimple)"
-				class="opacity-90 transition-colors duration-1000 will-change-[r_cy_cx]"
+				class="opacity-40 transition-colors duration-1000"
 			/>
 			<rect
 				x="0"
@@ -262,7 +261,7 @@
 				fill={theme.secondary}
 				fill-opacity="0.5"
 				mask="url(#fsStormMaskSimple)"
-				class="transition-colors duration-1000 will-change-[r_cy_cx]"
+				class="transition-colors duration-1000"
 			/>
 		{/if}
 
