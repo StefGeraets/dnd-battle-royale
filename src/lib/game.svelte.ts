@@ -2,12 +2,14 @@ import { browser } from "$app/environment";
 import { generateSchedule, GRID_SIZE, STORM_THEMES } from "./game.config";
 import { getAverageColor } from "./utils/color";
 import { asset } from '$app/paths';
+import { SvelteSet } from "svelte/reactivity";
 
 export type Point = {x: number; y: number };
 export type Zone = { x: number; y: number; r: number };
 export type SpecialArea = { id: string; x: number; y: number; name: string };
 export type GamePhase = 'IDLE' | 'WARNING' | 'SHRINKING' | 'STABLE';
 export type KillEvent = {id: string, msg: string, timestamp: number };
+export type GraphicsQuality = 'HIGH' | 'MEDIUM' | 'LOW';
 
 const SYNC_CHANNEL = 'dnd_royale_sync';
 const SAVE_KEY = 'dnd_royale_save_v1';
@@ -77,6 +79,7 @@ export class GameEngine {
   themeColor = $state('#3C5D68');
   stormThemeId = $state('fire');
   specialAreas = $state<SpecialArea[]>([]);
+  graphicsQuality = $state<GraphicsQuality>('HIGH');
 
   // COMPUTED VALUES
   distanceOutside = $derived.by(() => {
@@ -101,7 +104,14 @@ export class GameEngine {
     if (this.phase !== 'SHRINKING') return this.activeZone;
 
     const progress = (this.elapsedTime - this.shrinkStartTime) / this.shrinkDuration;
-    const p = Math.max(0, (Math.min(1, progress)));
+    let p = Math.max(0, (Math.min(1, progress)));
+
+    // Quantize progress for LOW quality to reduce update frequency
+    if (this.graphicsQuality === 'LOW') {
+      p = Math.round(p * 30) / 30; // Update ~30 times during shrink instead of ~300
+    } else if (this.graphicsQuality === 'MEDIUM') {
+      p = Math.round(p * 60) / 60; // Update ~60 times during shrink
+    }
 
     // If finished, we could auto-switch phase, but usually safer to wait for a tick
     return {
@@ -119,6 +129,7 @@ export class GameEngine {
   #worker: Worker | null = null;
 
   #killsTriggered = 0;
+  #deadVictims = new SvelteSet<string>();
 
   constructor(isDm: boolean = false) {
     this.#isDm = isDm;
@@ -330,11 +341,17 @@ export class GameEngine {
   }
 
   triggerRandomKill() {
+    const availableVictims = NAMES.filter((name) => !this.#deadVictims.has(name));
+
+    if (availableVictims.length === 0 || this.remainingCombatants <= FINAL_SURVIVORS) {
+      return;
+    }
+
     const attacker = NAMES[Math.floor(Math.random() * NAMES.length)];
-    let victim = NAMES[Math.floor(Math.random() * NAMES.length)];
+    let victim = availableVictims[Math.floor(Math.random() * availableVictims.length)];
     
-    while (attacker === victim) {
-      victim = NAMES[Math.floor(Math.random() * NAMES.length)];
+    while (attacker === victim && availableVictims.length > 1) {
+      victim = availableVictims[Math.floor(Math.random() * availableVictims.length)];
     };
     
     const template = KILL_TEMPLATES[Math.floor(Math.random() * KILL_TEMPLATES.length)];
@@ -353,6 +370,7 @@ export class GameEngine {
     this.killFeed = [newKill, ...this.killFeed].slice(0, MAX_FEED_ITEMS);
     this.remainingCombatants--;
     this.#killsTriggered++;
+    this.#deadVictims.add(victim);
   }
 
   setStormTheme(id: string) {
@@ -394,6 +412,13 @@ export class GameEngine {
     this.#saveState();
   }
 
+  setGraphicsQuality(quality: GraphicsQuality) {
+    if (!this.#isDm) return;
+    this.graphicsQuality = quality;
+    this.#broadcast();
+    this.#saveState();
+  }
+
   resetGame() {
     if (!this.#isDm) return;
 
@@ -405,7 +430,7 @@ export class GameEngine {
     this.shrinkStartTime = 0;
     this.shrinkDuration = 3000;
     this.secondsUntilShrink = 0;
-    this.nextRoundIndex = -1;
+    this.nextRoundIndex = 0;
     this.mapImage = asset('/islands.jpg');
     this.themeColor = '#3C5D68';
     this.stormThemeId = 'fire';
@@ -419,6 +444,8 @@ export class GameEngine {
     this.targetZone = {x: 50, y: 50, r: 150};
     this.killFeed = [];
     this.#killsTriggered = 0;
+    this.#deadVictims = new SvelteSet();
+    this.graphicsQuality = 'HIGH';
 
     // window.location.reload();
   }
@@ -446,7 +473,7 @@ export class GameEngine {
         activeZone: $state.snapshot(this.activeZone),
         targetZone: $state.snapshot(this.targetZone),
         killFeed: $state.snapshot(this.killFeed),
-        killsTriggered: this.#killsTriggered,
+        graphicsQuality: this.graphicsQuality,
     };
 
     this.#channel?.postMessage(payload);
@@ -476,6 +503,8 @@ export class GameEngine {
       themeColor: this.themeColor,
       stormThemeId: this.stormThemeId,
       killsTriggered: this.#killsTriggered,
+      deadVictims: Array.from(this.#deadVictims),
+      graphicsQuality: this.graphicsQuality,
       timestamp: Date.now(),
     }
 
@@ -512,6 +541,8 @@ export class GameEngine {
       this.remainingCombatants = data.remainingCombatants || INITIAL_COMBATANTS;
       this.killFeed = data.killFeed || [];
       this.#killsTriggered = data.killsTriggered;
+      this.#deadVictims = new SvelteSet(data.deadVictims || []);
+      this.graphicsQuality = data.graphicsQuality || 'HIGH';
       
       // Note: We do NOT restore 'isRunning'. 
       // It is safer to start PAUSED after a reload so the DM can get their bearings.
@@ -551,7 +582,7 @@ export class GameEngine {
       this.targetZone = d.targetZone;
       this.remainingCombatants = d.remainingCombatants;
       this.killFeed = d.killFeed || [];
-      this.#killsTriggered = d.killsTriggered || 0;
+      this.graphicsQuality = d.graphicsQuality || 'HIGH';
     }
   }
 }
