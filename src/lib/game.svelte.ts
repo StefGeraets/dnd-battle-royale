@@ -431,7 +431,7 @@ export class GameEngine {
     this.shrinkDuration = 3000;
     this.secondsUntilShrink = 0;
     this.nextRoundIndex = 0;
-    this.mapImage = asset('/islands.jpg');
+    this.mapImage = asset('/islands.webp');
     this.themeColor = '#3C5D68';
     this.stormThemeId = 'fire';
     this.totalGameHours = 2.5;
