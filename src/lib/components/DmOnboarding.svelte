@@ -52,7 +52,7 @@
 						<li>
 							Open <a href={resolve('/presenter')} target="_blank"
 								><code
-									class="bg-zinc-700 px-1 rounded text-white underline hover:decoration-blue-500 decoration-2 underline-offset-2"
+									class="bg-zinc-700 px-1 rounded text-blue-400 hover:text-blue-100 underline hover:decoration-blue-500 decoration-2 underline-offset-2"
 									>/presenter</code
 								></a
 							> in a new browser window.

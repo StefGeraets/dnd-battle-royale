@@ -140,7 +140,7 @@
 		/>
 	{/if}
 
-	<KillFeed {game} />
+	<!-- <KillFeed {game} /> -->
 
 	<CountdownOverlay {game} />
 

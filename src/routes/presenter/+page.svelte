@@ -25,7 +25,7 @@
 >
 	<MapCanvas {game} isDm={false} />
 
-	<KillFeed {game} />
+	<!-- <KillFeed {game} /> -->
 
 	<PresenterCurtain show={game.isPresenterHidden} />
 

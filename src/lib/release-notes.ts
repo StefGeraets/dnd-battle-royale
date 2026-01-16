@@ -16,6 +16,10 @@ export type ReleaseNotes = {
 // release marks which ones it delivered via completedUpcoming.
 export const ROADMAP: RoadmapItem[] = [
 	{
+		id: 'kill-feed',
+		label: 'Make it feel lived in for the players by showing combatants dying during the game'
+	},
+	{
 		id: 'kill-pacing',
 		label: 'More configurable kill pacing and custom combatant lists.'
 	},
@@ -32,9 +36,25 @@ export const ROADMAP: RoadmapItem[] = [
 		label: 'Custom combatant name lists and team/party management.'
 	},
 	{
+		id: 'card-draw',
+		label: 'Do the random card drawing for loot and encounters in app'
+	},
+	{
 		id: 'multiple-parties',
 		label: 'Multiple parties on the map.'
 	},
+	{
+		id: '',
+		label: '',
+	},
+	{
+		id: 'storm-quality',
+		label: 'DM is able to adjust the quality of the storm for smooth rendering on less powerfull pc\'s'
+	},
+	{
+		id: 'map-presets',
+		label: 'DM is able to select a map preset'
+	}
 ];
 
 // Generated from git commit history.
@@ -56,7 +76,7 @@ export const RELEASES: ReleaseNotes[] = [
 			'Added lava map and planes/desert map presets',
 			'Automatic theme color matching for new map presets'
 		],
-		completedUpcoming: []
+		completedUpcoming: ['map-presets']
 	},
 	{
 		version: '1.0.2',
@@ -68,7 +88,7 @@ export const RELEASES: ReleaseNotes[] = [
 			'Improved storm animation smoothing across quality levels',
 			'Fixed reset campaign functionality (countdown overlay now shows correctly)',
 		],
-		completedUpcoming: []
+		completedUpcoming: ['storm-quality']
 	},
 	{
 		version: '1.0.1',

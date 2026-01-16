@@ -7,7 +7,7 @@
 	const appVersion: string = APP_VERSION;
 	const STORAGE_KEY = 'dm_version_seen';
 
-	let show = $state(false);
+	let show = $state(true);
 	let showAllReleases = $state(false);
 
 	onMount(() => {
