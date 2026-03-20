@@ -19,15 +19,15 @@
 	{#if game.phase === 'WARNING'}
 		<div transition:fly={{ y: -50, duration: 500 }}>
 			<div
-				class="flex flex-col items-center gap-1 rounded-xl border-4 border-red-600 bg-red-950/90 px-8 py-4 text-white shadow-[0_0_50px_rgba(220,38,38,0.6)] backdrop-blur-sm"
+				class="flex flex-col items-center gap-1 rounded-lg border-2 border-red-600 bg-red-950/60 px-8 py-4 text-white shadow-[0_0_50px_rgba(220,38,38,0.6)] backdrop-blur-xs"
 			>
-				<div class="text-xs font-black tracking-[0.2em] text-red-400 uppercase animate-pulse">
+				<div class="text-xs font-black tracking-[0.2em] text-red-500 uppercase animate-pulse">
 					Zone Destabilizing
 				</div>
 
 				<div
 					class="font-mono text-6xl font-bold tabular-nums tracking-wider text-red-100"
-					style="text-shadow: 4px 4px 0 #000;"
+					style="text-shadow: 0 0 5px #000;"
 				>
 					{fmt(game.secondsUntilShrink)}
 				</div>

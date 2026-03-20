@@ -21,7 +21,7 @@
 >
 	<div class="absolute inset-0 top-8 h-1 w-full bg-zinc-700"></div>
 
-	{#each schedule as round}
+	{#each schedule as round (round.triggerTime)}
 		{@const startMs = round.triggerTime * 60 * 1000}
 		{@const durationMs = round.duration * 1000}
 		{@const warningMs = round.warningDuration * 1000}

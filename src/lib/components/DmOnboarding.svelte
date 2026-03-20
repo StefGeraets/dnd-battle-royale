@@ -15,9 +15,9 @@
 >
 	<div
 		transition:scale={{ start: 0.95, duration: 200 }}
-		class="w-full max-w-3xl rounded-xl border border-zinc-700 bg-zinc-900 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+		class="w-full max-w-3xl rounded-lg border border-zinc-800 bg-zinc-900 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
 	>
-		<div class="border-b border-zinc-800 bg-zinc-950 p-6 flex justify-between items-center">
+		<div class="bg-zinc-950 p-6 flex justify-between items-center">
 			<div>
 				<h1 class="text-2xl font-bold text-white">Battle Royale DM Command Center</h1>
 				<div class="flex items-center gap-2 text-sm text-slate-400">
@@ -32,7 +32,7 @@
 					</a>
 				</div>
 			</div>
-			<div class="text-4xl">👑</div>
+			<div class="text-4xl hue-rotate-310 saturate-200">👑</div>
 		</div>
 
 		<div class="overflow-y-auto p-6 space-y-8 text-zinc-300">
