@@ -522,27 +522,27 @@ export class GameEngine {
       console.log('[GameEngine] Restoring saved game...', data);
 
       // Restore all state
-      this.elapsedTime = data.elapsedTime;
-      this.playerPos = data.playerPos;
-      this.activeZone = data.activeZone;
-      this.targetZone = data.targetZone;
-      this.phase = data.phase;
-      this.shrinkStartTime = data.shrinkStartTime;
-      this.shrinkDuration = data.shrinkDuration;
-      this.secondsUntilShrink = data.secondsUntilShrink;
-      this.nextRoundIndex = data.nextRoundIndex;
-      this.totalGameHours = data.totalGameHours || 2.5;
-      this.isPresenterHidden = data.isPresenterHidden || true;
-      this.schedule = data.schedule || generateSchedule(this.totalGameHours);
-      this.mapImage = data.mapImage || this.mapImage;
-      this.themeColor = data.themeColor || this.themeColor;
-      this.stormThemeId = data.stormThemeId || this.stormThemeId;
-      this.specialAreas = data.specialAreas || [];
-      this.remainingCombatants = data.remainingCombatants || INITIAL_COMBATANTS;
-      this.killFeed = data.killFeed || [];
-      this.#killsTriggered = data.killsTriggered;
-      this.#deadVictims = new SvelteSet(data.deadVictims || []);
-      this.graphicsQuality = data.graphicsQuality || 'HIGH';
+      this.elapsedTime = data.elapsedTime ?? 0;
+      this.playerPos = data.playerPos ?? { x: 1, y: 1 };
+      this.activeZone = data.activeZone ?? { x: 50, y: 50, r: 150 };
+      this.targetZone = data.targetZone ?? { x: 50, y: 50, r: 150 };
+      this.phase = data.phase ?? 'IDLE';
+      this.shrinkStartTime = data.shrinkStartTime ?? 0;
+      this.shrinkDuration = data.shrinkDuration ?? 30000;
+      this.secondsUntilShrink = data.secondsUntilShrink ?? 0;
+      this.nextRoundIndex = data.nextRoundIndex ?? 0;
+      this.totalGameHours = data.totalGameHours ?? 2.5;
+      this.isPresenterHidden = data.isPresenterHidden ?? true;
+      this.schedule = data.schedule ?? generateSchedule(this.totalGameHours);
+      this.mapImage = data.mapImage ?? this.mapImage;
+      this.themeColor = data.themeColor ?? this.themeColor;
+      this.stormThemeId = data.stormThemeId ?? this.stormThemeId;
+      this.specialAreas = data.specialAreas ?? [];
+      this.remainingCombatants = data.remainingCombatants ?? INITIAL_COMBATANTS;
+      this.killFeed = data.killFeed ?? [];
+      this.#killsTriggered = data.killsTriggered ?? 0;
+      this.#deadVictims = new SvelteSet(data.deadVictims ?? []);
+      this.graphicsQuality = data.graphicsQuality ?? 'HIGH';
       
       // Note: We do NOT restore 'isRunning'. 
       // It is safer to start PAUSED after a reload so the DM can get their bearings.

@@ -271,16 +271,16 @@
 			{/if}
 			<!-- grid lines -->
 			<g stroke="white" stroke-opacity="0.15" stroke-width="0.1">
-				{#each Array(GRID_SIZE + 1) as _, i}
+				{#each Array(GRID_SIZE + 1) as _, i (i)}
 					<line x1={i * CELL_SIZE} y1="0" x2={i * CELL_SIZE} y2="100" />
 				{/each}
-				{#each Array(GRID_SIZE + 1) as _, i}
+				{#each Array(GRID_SIZE + 1) as _, i (i)}
 					<line x1="0" y1={i * CELL_SIZE} x2="100" y2={i * CELL_SIZE} />
 				{/each}
 			</g>
 
 			<!-- special areas -->
-			{#each game.specialAreas as area}
+			{#each game.specialAreas as area (area)}
 				<g
 					transform="translate({area.x * CELL_SIZE}, {area.y * CELL_SIZE})"
 					class="outline-0 cursor-pointer"
