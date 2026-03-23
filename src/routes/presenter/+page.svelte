@@ -3,6 +3,7 @@
 	import MapCanvas from '$lib/components/MapCanvas.svelte';
 	import PresenterCurtain from '$lib/components/PresenterCurtain.svelte';
 	import CountdownOverlay from '$lib/components/CountdownOverlay.svelte';
+	import { onMount } from 'svelte';
 	// import KillFeed from '$lib/components/KillFeed.svelte';
 
 	// Initialize Engine as Presenter (Replica)
@@ -10,11 +11,23 @@
 
 	let isFullscreen = $state(false);
 
+	onMount(() => {
+		const onFullscreenChange = () => {
+			isFullscreen = !!document.fullscreenElement;
+		};
+		document.addEventListener('fullscreenchange', onFullscreenChange);
+		return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
+	});
+
 	function toggleFullscreen() {
 		if (!document.fullscreenElement) {
-			document.documentElement.requestFullscreen().then(() => (isFullscreen = true));
+			document.documentElement.requestFullscreen().catch((e) =>
+				console.warn('[Presenter] Fullscreen request denied:', e)
+			);
 		} else {
-			document.exitFullscreen().then(() => (isFullscreen = false));
+			document.exitFullscreen().catch((e) =>
+				console.warn('[Presenter] Exit fullscreen failed:', e)
+			);
 		}
 	}
 </script>
@@ -34,7 +47,8 @@
 	{#if !isFullscreen}
 		<button
 			class="fixed bottom-4 right-4 z-100 bg-white/10 hover:bg-white/20 text-white text-xs px-3 py-1 rounded backdrop-blur border border-white/20 transition-opacity"
-			onclick={toggleFullscreen}>⛶ Fullscreen</button
+			aria-label="Enter fullscreen"
+		onclick={toggleFullscreen}>⛶ Fullscreen</button
 		>
 	{/if}
 </div>
