@@ -43,11 +43,13 @@
 		}
 	});
 
+	const DONATION_POPUP_DELAY_MS = 5 * 60 * 1000;
+
 	$effect(() => {
 		if (isGameOver && !donationPopupSeen) {
 			const timer = setTimeout(() => {
 					showDonationPopup = true;
-			}, 1000 * 60 * 5);  // Wait 5 minutes after last shrink to show the popup
+			}, DONATION_POPUP_DELAY_MS);
 			return () => clearTimeout(timer);
 		}
 	});

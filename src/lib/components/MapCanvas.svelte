@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { GameEngine } from '$lib/game.svelte';
-	import { GRID_SIZE, STORM_THEMES } from '../game.config';
+	import { GRID_SIZE, STORM_THEMES, DEFAULT_SHRINK_DURATION_MS, QUALITY_STEPS_LOW, QUALITY_STEPS_MEDIUM } from '../game.config';
 
 	type Props = {
 		game: GameEngine;
@@ -31,8 +31,8 @@
 	let useFadeEdge = $derived(game.graphicsQuality === 'HIGH');
 	let zoneTransitionMs = $derived.by(() => {
 		if (game.graphicsQuality === 'HIGH') return 150; // frequent updates, short smoothing
-		if (game.graphicsQuality === 'MEDIUM') return Math.max(120, (game.shrinkDuration || 30000) / 60);
-		return Math.max(150, (game.shrinkDuration || 30000) / 30); // LOW, fewer updates, longer smoothing
+		if (game.graphicsQuality === 'MEDIUM') return Math.max(120, (game.shrinkDuration || DEFAULT_SHRINK_DURATION_MS) / QUALITY_STEPS_MEDIUM);
+		return Math.max(150, (game.shrinkDuration || DEFAULT_SHRINK_DURATION_MS) / QUALITY_STEPS_LOW); // LOW, fewer updates, longer smoothing
 	});
 
 	function updateMetrics() {

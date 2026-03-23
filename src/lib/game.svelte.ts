@@ -1,5 +1,5 @@
 import { browser } from "$app/environment";
-import { generateSchedule, GRID_SIZE, STORM_THEMES } from "./game.config";
+import { generateSchedule, GRID_SIZE, STORM_THEMES, DEFAULT_SHRINK_DURATION_MS, QUALITY_STEPS_LOW, QUALITY_STEPS_MEDIUM } from "./game.config";
 import { getAverageColor } from "./utils/color";
 import { asset } from '$app/paths';
 import { SvelteSet } from "svelte/reactivity";
@@ -17,6 +17,10 @@ const SAVE_KEY = 'dnd_royale_save_v1';
 const MAX_FEED_ITEMS = 5;
 const INITIAL_COMBATANTS = 100;
 const FINAL_SURVIVORS = 2;
+
+function generateUniqueId(): string {
+  return `${Date.now()}-${Math.floor(Math.random() * 1000000000)}`;
+}
 
 // Random Data Pools
 const NAMES = [
@@ -63,7 +67,7 @@ export class GameEngine {
   // Animation/Phase state
   phase = $state<GamePhase>('IDLE');
   shrinkStartTime = $state(0);
-  shrinkDuration = $state(30000);
+  shrinkDuration = $state(DEFAULT_SHRINK_DURATION_MS);
 
   totalGameHours = $state(2.5);
   secondsUntilShrink = $state(0);
@@ -109,9 +113,9 @@ export class GameEngine {
 
     // Quantize progress for LOW quality to reduce update frequency
     if (this.graphicsQuality === 'LOW') {
-      p = Math.round(p * 30) / 30; // Update ~30 times during shrink instead of ~300
+      p = Math.round(p * QUALITY_STEPS_LOW) / QUALITY_STEPS_LOW;
     } else if (this.graphicsQuality === 'MEDIUM') {
-      p = Math.round(p * 60) / 60; // Update ~60 times during shrink
+      p = Math.round(p * QUALITY_STEPS_MEDIUM) / QUALITY_STEPS_MEDIUM;
     }
 
     // If finished, we could auto-switch phase, but usually safer to wait for a tick
@@ -281,7 +285,7 @@ export class GameEngine {
     }
 
     this.specialAreas.push({
-      id: `${Date.now()}-${Math.floor(Math.random() * 1000000000)}`,
+      id: generateUniqueId(),
       x: gridX,
       y: gridY,
       name: `Chest ${this.specialAreas.length + 1}`
@@ -362,7 +366,7 @@ export class GameEngine {
       .map(seg => seg === '{A}' ? { token: 'A' as const } : seg === '{V}' ? { token: 'V' as const } : { text: seg });
 
     const newKill: KillEvent = {
-      id: `${Date.now()}-${Math.floor(Math.random() * 1000000000)}`,
+      id: generateUniqueId(),
       attacker,
       victim,
       parts,
@@ -530,7 +534,7 @@ export class GameEngine {
       this.targetZone = data.targetZone ?? { x: 50, y: 50, r: 150 };
       this.phase = data.phase ?? 'IDLE';
       this.shrinkStartTime = data.shrinkStartTime ?? 0;
-      this.shrinkDuration = data.shrinkDuration ?? 30000;
+      this.shrinkDuration = data.shrinkDuration ?? DEFAULT_SHRINK_DURATION_MS;
       this.secondsUntilShrink = data.secondsUntilShrink ?? 0;
       this.nextRoundIndex = data.nextRoundIndex ?? 0;
       this.totalGameHours = data.totalGameHours ?? 2.5;

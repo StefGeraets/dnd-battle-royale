@@ -2,6 +2,13 @@ import { asset } from '$app/paths';
 
 export const GRID_SIZE = 24;
 
+// Default shrink animation duration in milliseconds
+export const DEFAULT_SHRINK_DURATION_MS = 30000;
+
+// Animation quantization steps per quality tier (higher = smoother)
+export const QUALITY_STEPS_LOW = 30;
+export const QUALITY_STEPS_MEDIUM = 60;
+
 export type RoundConfig = {
 	id: number;
 	triggerTime: number; // In Minutes
