@@ -8,7 +8,8 @@ export type Point = {x: number; y: number };
 export type Zone = { x: number; y: number; r: number };
 export type SpecialArea = { id: string; x: number; y: number; name: string };
 export type GamePhase = 'IDLE' | 'WARNING' | 'SHRINKING' | 'STABLE';
-export type KillEvent = {id: string, msg: string, timestamp: number };
+export type KillEventPart = { text: string } | { token: 'A' | 'V' };
+export type KillEvent = { id: string; attacker: string; victim: string; parts: KillEventPart[]; timestamp: number };
 export type GraphicsQuality = 'HIGH' | 'MEDIUM' | 'LOW';
 
 const SYNC_CHANNEL = 'dnd_royale_sync';
@@ -356,14 +357,15 @@ export class GameEngine {
     
     const template = KILL_TEMPLATES[Math.floor(Math.random() * KILL_TEMPLATES.length)];
 
-    const aHtml = `<span class="text-yellow-500 font-bold">${attacker}</span>`;
-    const vHtml = `<span class="text-red-400 font-bold">${victim}</span>`;
-    
-    const msg = template.replace(/{A}/g, aHtml).replace(/{V}/g, vHtml);
+    const parts: KillEventPart[] = template.split(/(\{A\}|\{V\})/g)
+      .filter(seg => seg !== '')
+      .map(seg => seg === '{A}' ? { token: 'A' as const } : seg === '{V}' ? { token: 'V' as const } : { text: seg });
 
     const newKill: KillEvent = {
       id: `${Date.now()}-${Math.floor(Math.random() * 1000000000)}`,
-      msg,
+      attacker,
+      victim,
+      parts,
       timestamp: Date.now()
     }
 

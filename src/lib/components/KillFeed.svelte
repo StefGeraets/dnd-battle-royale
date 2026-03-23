@@ -27,8 +27,15 @@
 				class="relative overflow-hidden rounded p-2"
 			>
 				<div class="flex items-baseline justify-end gap-2 text-sm text-zinc-200 text-shadow-xs">
-					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-					{@html kill.msg}
+					{#each kill.parts as part (part)}
+						{#if 'token' in part}
+							<span class={part.token === 'A' ? 'text-yellow-500 font-bold' : 'text-red-400 font-bold'}>
+								{part.token === 'A' ? kill.attacker : kill.victim}
+							</span>
+						{:else}
+							{part.text}
+						{/if}
+					{/each}
 				</div>
 			</div>
 		{/each}
