@@ -24,3 +24,7 @@ vite.config.ts.timestamp-*
 
 # Build
 bun.lock
+
+# AI
+CLAUDE.md
+.mcp.json

@@ -3,7 +3,7 @@
 	import MapCanvas from '$lib/components/MapCanvas.svelte';
 	import PresenterCurtain from '$lib/components/PresenterCurtain.svelte';
 	import CountdownOverlay from '$lib/components/CountdownOverlay.svelte';
-	import KillFeed from '$lib/components/KillFeed.svelte';
+	// import KillFeed from '$lib/components/KillFeed.svelte';
 
 	// Initialize Engine as Presenter (Replica)
 	const game = new GameEngine(false);

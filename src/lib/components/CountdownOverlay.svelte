@@ -1,18 +1,13 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 	import type { GameEngine } from '../game.svelte';
+	import { formatSeconds } from '../utils/time';
 
 	type Props = {
 		game: GameEngine;
 	};
 
 	let { game }: Props = $props();
-
-	function fmt(secs: number) {
-		const m = Math.floor(secs / 60);
-		const s = secs % 60;
-		return `${m}:${s.toString().padStart(2, '0')}`;
-	}
 </script>
 
 <div class="pointer-events-none fixed inset-x-0 top-10 z-60 flex justify-center">
@@ -29,7 +24,7 @@
 					class="font-mono text-6xl font-bold tabular-nums tracking-wider text-red-100"
 					style="text-shadow: 0 0 5px #000;"
 				>
-					{fmt(game.secondsUntilShrink)}
+					{formatSeconds(game.secondsUntilShrink)}
 				</div>
 			</div>
 		</div>

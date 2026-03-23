@@ -27,6 +27,7 @@
 				class="relative overflow-hidden rounded p-2"
 			>
 				<div class="flex items-baseline justify-end gap-2 text-sm text-zinc-200 text-shadow-xs">
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 					{@html kill.msg}
 				</div>
 			</div>

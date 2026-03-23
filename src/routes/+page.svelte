@@ -9,8 +9,9 @@
 	import { onMount } from 'svelte';
 	import { asset } from '$app/paths';
 	import BuyCoffeeToast from '$lib/components/BuyCoffeeToast.svelte';
-	import KillFeed from '$lib/components/KillFeed.svelte';
+	// import KillFeed from '$lib/components/KillFeed.svelte';
 	import VersionOverlay from '$lib/components/VersionOverlay.svelte';
+	import { formatMs } from '$lib/utils/time';
 
 	const game = new GameEngine(true);
 
@@ -51,13 +52,6 @@
 		}
 	});
 
-	// Helper to format ms to MM:SS
-	function formatTime(ms: number) {
-		const totalSeconds = Math.floor(ms / 1000);
-		const minutes = Math.floor(totalSeconds / 60);
-		const seconds = totalSeconds % 60;
-		return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-	}
 
 	function closeOnboarding() {
 		showOnboarding = false;
@@ -284,7 +278,7 @@
 
 				<div class="p-4">
 					<div class="mb-4 text-center font-mono text-5xl font-black tracking-tight text-white">
-						{formatTime(game.elapsedTime)}
+						{formatMs(game.elapsedTime)}
 					</div>
 
 					<div class="mb-4 space-y-1">
