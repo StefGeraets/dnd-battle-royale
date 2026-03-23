@@ -126,6 +126,19 @@
 		<DmOnboarding onClose={closeOnboarding} />
 	{/if}
 
+	{#if game.engineError}
+		<div
+			class="fixed top-0 inset-x-0 z-200 flex items-center gap-3 bg-red-700 px-4 py-2 text-sm text-white shadow-lg"
+		>
+			<span class="font-bold shrink-0">⚠ Engine Error</span>
+			<span class="grow">{game.engineError}</span>
+			<button
+				class="shrink-0 rounded bg-white/20 px-3 py-1 font-bold hover:bg-white/30"
+				onclick={() => window.location.reload()}>Reload</button
+			>
+		</div>
+	{/if}
+
 	<VersionOverlay />
 
 	{#if showDonationPopup}

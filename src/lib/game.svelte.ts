@@ -86,6 +86,9 @@ export class GameEngine {
   specialAreas = $state<SpecialArea[]>([]);
   graphicsQuality = $state<GraphicsQuality>('HIGH');
 
+  // Non-null when the engine has a fatal error the DM needs to act on
+  engineError = $state<string | null>(null);
+
   // COMPUTED VALUES
   distanceOutside = $derived.by(() => {
     const factor = GRID_SIZE / 100;
@@ -156,10 +159,14 @@ export class GameEngine {
     try {
       // eslint-disable-next-line svelte/prefer-svelte-reactivity
       this.#worker = new Worker(new URL('./time-worker.ts', import.meta.url), { type: 'module' });
-      this.#worker.onerror = (err) => console.error('[GameEngine] Worker Error', err);
+      this.#worker.onerror = (err) => {
+        console.error('[GameEngine] Worker Error', err);
+        this.engineError = 'The game timer has crashed. The clock will not advance. Please reload the page.';
+      };
       this.#worker.onmessage = () => this.#tick();
     } catch (e) {
       console.error('[GameEngine] Failed to create worker:', e);
+      this.engineError = 'Failed to start the game timer. Please reload the page.';
     }
   
     this.#channel!.onmessage = (event) => {
