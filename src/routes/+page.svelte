@@ -12,6 +12,7 @@
 	// import KillFeed from '$lib/components/KillFeed.svelte';
 	import VersionOverlay from '$lib/components/VersionOverlay.svelte';
 	import { formatMs } from '$lib/utils/time';
+	import { STORAGE_KEYS } from '$lib/game.config';
 
 	const game = new GameEngine(true);
 
@@ -30,7 +31,7 @@
 	let isGameOver = $derived(!game.nextRound && game.elapsedTime > 0);
 
 	onMount(() => {
-		const hasSeen = localStorage.getItem('dm_onboarding_seen');
+		const hasSeen = localStorage.getItem(STORAGE_KEYS.onboardingSeen);
 		if (hasSeen === 'true') {
 			showOnboarding = false;
 		}
@@ -57,7 +58,7 @@
 
 	function closeOnboarding() {
 		showOnboarding = false;
-		localStorage.setItem('dm_onboarding_seen', 'true');
+		localStorage.setItem(STORAGE_KEYS.onboardingSeen, 'true');
 	}
 
 	function playSound() {

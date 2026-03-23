@@ -1,5 +1,5 @@
 import { browser } from "$app/environment";
-import { generateSchedule, GRID_SIZE, STORM_THEMES, DEFAULT_SHRINK_DURATION_MS, QUALITY_STEPS_LOW, QUALITY_STEPS_MEDIUM } from "./game.config";
+import { generateSchedule, GRID_SIZE, STORM_THEMES, DEFAULT_SHRINK_DURATION_MS, QUALITY_STEPS_LOW, QUALITY_STEPS_MEDIUM, getDefaultState, STORAGE_KEYS } from "./game.config";
 import { getAverageColor } from "./utils/color";
 import { asset } from '$app/paths';
 import { SvelteSet } from "svelte/reactivity";
@@ -13,7 +13,7 @@ export type KillEvent = { id: string; attacker: string; victim: string; parts: K
 export type GraphicsQuality = 'HIGH' | 'MEDIUM' | 'LOW';
 
 const SYNC_CHANNEL = 'dnd_royale_sync';
-const SAVE_KEY = 'dnd_royale_save_v1';
+
 const MAX_FEED_ITEMS = 5;
 const INITIAL_COMBATANTS = 100;
 const FINAL_SURVIVORS = 2;
@@ -428,32 +428,31 @@ export class GameEngine {
   resetGame() {
     if (!this.#isDm) return;
 
-    localStorage.removeItem(SAVE_KEY);
+    localStorage.removeItem(STORAGE_KEYS.save);
 
-    this.elapsedTime = 0;
-    this.isRunning = false;
-    this.phase = 'IDLE';
-    this.shrinkStartTime = 0;
-    this.shrinkDuration = 3000;
-    this.secondsUntilShrink = 0;
-    this.nextRoundIndex = 0;
-    this.mapImage = asset('/islands.webp');
-    this.themeColor = '#3C5D68';
-    this.stormThemeId = 'fire';
-    this.totalGameHours = 2.5;
-    this.isPresenterHidden = true;
+    const data = getDefaultState();
+    this.elapsedTime = data.elapsedTime;
+    this.isRunning = data.isRunning;
+    this.phase = data.phase;
+    this.shrinkStartTime = data.shrinkStartTime;
+    this.shrinkDuration = data.shrinkDuration;
+    this.secondsUntilShrink = data.secondsUntilShrink;
+    this.nextRoundIndex = data.nextRoundIndex;
+    this.mapImage = data.mapImage;
+    this.themeColor = data.themeColor;
+    this.stormThemeId = data.stormThemeId;
+    this.totalGameHours = data.totalGameHours;
+    this.isPresenterHidden = data.isPresenterHidden;
     this.remainingCombatants = INITIAL_COMBATANTS;
-    this.schedule = generateSchedule(2.5);
+    this.schedule = data.schedule;
     this.specialAreas = [];
-    this.playerPos = {x: 1, y: 1};
-    this.activeZone = {x: 50, y: 50, r: 150};
-    this.targetZone = {x: 50, y: 50, r: 150};
+    this.playerPos = data.playerPos;
+    this.activeZone = data.activeZone;
+    this.targetZone = data.targetZone;
     this.killFeed = [];
+    this.graphicsQuality = data.graphicsQuality;
     this.#killsTriggered = 0;
     this.#deadVictims = new SvelteSet();
-    this.graphicsQuality = 'HIGH';
-
-    // window.location.reload();
   }
 
   #broadcast() {
@@ -514,13 +513,13 @@ export class GameEngine {
       timestamp: Date.now(),
     }
 
-    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    localStorage.setItem(STORAGE_KEYS.save, JSON.stringify(data));
   }
 
   #loadState() {
     if (!this.#isDm) return;
 
-    const raw = localStorage.getItem(SAVE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEYS.save);
     if (!raw) return;
 
     try {
