@@ -211,8 +211,7 @@
 					</div>
 
 					<div class="pt-2 border-t border-zinc-700/50 {game.elapsedTime > 0 ? 'opacity-50' : ''}">
-						<!-- svelte-ignore a11y_label_has_associated_control -->
-						<label class="mb-1 block text-xs text-zinc-400">Preparation</label>
+						<p class="mb-1 text-xs text-zinc-400">Preparation</p>
 						<button
 							class="w-full py-2 px-3 rounded text-sm font-bold bg-zinc-700 hover:bg-zinc-600 text-zinc-200 flex items-center justify-center gap-2"
 							onclick={() => (mode = 'CHEST')}
@@ -227,8 +226,7 @@
 					</div>
 
 					<div class="pt-2 border-t border-zinc-700/50">
-						<!-- svelte-ignore a11y_label_has_associated_control -->
-						<label class="block text-xs text-zinc-400 mb-1">Presenter Screen</label>
+						<p class="mb-1 text-xs text-zinc-400">Presenter Screen</p>
 						<button
 							class="w-full py-2 px-3 rounded text-sm font-bold transition-colors {game.isPresenterHidden
 								? 'bg-red-600 hover:bg-red-500'

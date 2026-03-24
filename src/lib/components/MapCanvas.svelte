@@ -271,10 +271,9 @@
 			{/if}
 			<!-- grid lines -->
 			<g stroke="white" stroke-opacity="0.15" stroke-width="0.1">
+				<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
 				{#each Array(GRID_SIZE + 1) as _, i (i)}
 					<line x1={i * CELL_SIZE} y1="0" x2={i * CELL_SIZE} y2="100" />
-				{/each}
-				{#each Array(GRID_SIZE + 1) as _, i (i)}
 					<line x1="0" y1={i * CELL_SIZE} x2="100" y2={i * CELL_SIZE} />
 				{/each}
 			</g>
@@ -370,24 +369,10 @@
 </div>
 
 <style>
-	.animate-pulse {
-		animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-	}
-
 	.zone-circle,
 	.zone-circle-mask {
 		transition: cx var(--zone-transition, 200ms) linear, cy var(--zone-transition, 200ms) linear,
 			r var(--zone-transition, 200ms) linear;
 		will-change: cx cy r;
-	}
-
-	@keyframes pulse {
-		0%,
-		100% {
-			opacity: 1;
-		}
-		50% {
-			opacity: 0.2;
-		}
 	}
 </style>

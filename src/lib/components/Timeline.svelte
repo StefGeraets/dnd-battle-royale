@@ -10,10 +10,7 @@
 	let schedule = $derived(game.schedule);
 	let lastEvent = $derived(schedule.length > 0 ? schedule[schedule.length - 1] : null);
 	let totalDurationMs = $derived(lastEvent ? (lastEvent.triggerTime + 10) * 60 * 1000 : 60000);
-
-	function getPct(ms: number) {
-		return Math.min(100, (ms / totalDurationMs) * 100);
-	}
+	let nowPct = $derived(Math.min(100, (game.elapsedTime / totalDurationMs) * 100));
 </script>
 
 <div
@@ -26,18 +23,22 @@
 		{@const durationMs = round.duration * 1000}
 		{@const warningMs = round.warningDuration * 1000}
 		{@const warningStartMs = startMs - warningMs}
+		{@const startPct = Math.min(100, (startMs / totalDurationMs) * 100)}
+		{@const durationPct = Math.min(100, (durationMs / totalDurationMs) * 100)}
+		{@const warningStartPct = Math.min(100, (warningStartMs / totalDurationMs) * 100)}
+		{@const warningPct = Math.min(100, (warningMs / totalDurationMs) * 100)}
 
-		<div class="absolute top-8 h-3 w-px bg-zinc-500" style="left: {getPct(startMs)}%"></div>
+		<div class="absolute top-8 h-3 w-px bg-zinc-500" style="left: {startPct}%"></div>
 		<div
 			class="absolute top-11 -translate-x-1/2 text-[10px] text-zinc-400 font-mono"
-			style="left: {getPct(startMs)}%"
+			style="left: {startPct}%"
 		>
 			{round.triggerTime}:00
 		</div>
 
 		<div
 			class="absolute top-4 flex h-4 items-center justify-center truncate rounded bg-yellow-600/50 border border-yellow-600 text-[9px] text-yellow-200"
-			style="left: {getPct(warningStartMs)}%; width: {getPct(warningMs)}%;"
+			style="left: {warningStartPct}%; width: {warningPct}%;"
 			title="Warning time: {warningMs / 1000}s"
 		>
 			COUNTDOWN
@@ -45,7 +46,7 @@
 
 		<div
 			class="absolute top-4 flex h-4 items-center justify-center truncate rounded border border-red-800 bg-red-900/60 px-1 text-[9px] text-red-200"
-			style="left: {getPct(startMs)}%; width: {getPct(durationMs)}%;"
+			style="left: {startPct}%; width: {durationPct}%;"
 			title="{round.label}: Shrinking {durationMs / 1000}s"
 		>
 			SHRINK
@@ -54,7 +55,7 @@
 
 	<div
 		class="absolute bottom-0 top-0 z-10 w-0.5 bg-yellow-400 shadow-[0_0_10px_orange] transition-all duration-100 ease-linear"
-		style="left: {getPct(game.elapsedTime)}%"
+		style="left: {nowPct}%"
 	>
 		<div
 			class="absolute top-0 -translate-x-1/2 rounded-b bg-yellow-500 px-1.5 py-0.5 text-[10px] font-bold text-black"

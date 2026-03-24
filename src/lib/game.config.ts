@@ -123,7 +123,7 @@ export const MAP_PRESETS = [
     url: asset('/lakes.webp'), 
     color: '#CAA86B' 
   },
-  // { 
+  // { Implement later
   //   id: 'ice', 
   //   label: 'Fjord Blizzard', 
   //   url: asset('/fjord.webp'), 
