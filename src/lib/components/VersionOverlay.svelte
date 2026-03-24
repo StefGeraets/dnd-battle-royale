@@ -3,16 +3,18 @@
 	import { onMount } from 'svelte';
 	import { APP_VERSION } from '$lib/app-metadata';
 	import { latestRelease, RELEASES, ROADMAP, type RoadmapItem } from '$lib/release-notes';
+	import { STORAGE_KEYS } from '$lib/game.config';
+	import Icon from '$lib/components/Icon.svelte';
+	import { SvelteSet } from 'svelte/reactivity';
 
 	const appVersion: string = APP_VERSION;
-	const STORAGE_KEY = 'dm_version_seen';
 
 	let show = $state(false);
 	let showAllReleases = $state(false);
 
 	onMount(() => {
 		try {
-			const lastSeen = localStorage.getItem(STORAGE_KEY);
+			const lastSeen = localStorage.getItem(STORAGE_KEYS.versionSeen);
 			if (lastSeen !== appVersion) {
 				show = true;
 			}
@@ -23,7 +25,7 @@
 	});
 
 	const roadmapStatus = $derived.by<{ item: RoadmapItem; done: boolean }[]>(() => {
-		const completedIds = new Set<string>();
+		const completedIds = new SvelteSet<string>();
 		for (const r of RELEASES) {
 			for (const id of r.completedUpcoming ?? []) {
 				completedIds.add(id);
@@ -38,7 +40,7 @@
 	function close() {
 		show = false;
 		
-    localStorage.setItem(STORAGE_KEY, appVersion);
+    localStorage.setItem(STORAGE_KEYS.versionSeen, appVersion);
 		
 	}
 </script>
@@ -76,7 +78,7 @@
 
 				<!-- Releases: show latest by default, all when expanded -->
 				<div class="space-y-2">
-					{#each showAllReleases ? RELEASES : [latestRelease] as release, i}
+					{#each showAllReleases ? RELEASES : [latestRelease] as release, i (i)}
 						<div
 							class={`rounded-lg border p-2 ${
 								i === 0
@@ -114,7 +116,7 @@
 									New in this version
 								</div>
 								<ul class="space-y-1 text-xs text-zinc-200">
-									{#each release.features as f}
+									{#each release.features as f (f)}
 										<li class="flex items-start gap-2">
 											<span class="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
 											<span>{f}</span>
@@ -131,13 +133,13 @@
 										Completed from roadmap
 									</div>
 									<ul class="space-y-1 text-xs text-zinc-200">
-										{#each release.completedUpcoming as id}
+										{#each release.completedUpcoming as id (id)}
 											{@const item: RoadmapItem | undefined = ROADMAP.find((r) => r.id === id)}
 											{#if item}
 												<li class="flex items-start gap-2">
 													<span
-														class="mt-0.5 inline-flex h-3 w-3 items-center justify-center rounded-full bg-emerald-500 text-[8px] font-bold text-black"
-														>✓</span
+														class="mt-0.5 inline-flex h-3 w-3 items-center justify-center rounded-full bg-emerald-500 text-black"
+														><Icon name="check" size="8" /></span
 													>
 													<span>{item.label}</span>
 												</li>
@@ -182,7 +184,7 @@
 							</div>
 						</div>
 						<ul class="space-y-0.5">
-							{#each roadmapStatus as rs}
+							{#each roadmapStatus as rs (rs)}
 								<li class="flex items-start gap-2">
 									<span
 										class={`mt-0.5 inline-flex h-3 w-3 items-center justify-center rounded-full text-xs font-bold ${
@@ -191,7 +193,7 @@
 												: 'border border-zinc-600 text-zinc-400 bg-zinc-900'
 										}`}
 									>
-										{rs.done ? '✓' : ''}
+										{#if rs.done}<Icon name="check" size="8" />{/if}
 									</span>
 									<span class={rs.done ? 'text-zinc-400 line-through' : 'text-zinc-200'}>
 										{rs.item.label}

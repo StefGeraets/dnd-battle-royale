@@ -1,35 +1,42 @@
 <script lang="ts">
-    import { fly } from 'svelte/transition';
-    import { flip } from 'svelte/animate';
-    import type { GameEngine } from '$lib/game.svelte';
+	import { fly } from 'svelte/transition';
+	import { flip } from 'svelte/animate';
+	import type { GameEngine } from '$lib/game.svelte';
+	import { formatMs } from '$lib/utils/time';
 
-    let { game } = $props<{ game: GameEngine }>();
+	type Props = { game: GameEngine };
+	let { game }: Props = $props();
+
+	// Oldest entries (higher index) fade out
+	const FADE_OPACITIES = [1, 0.8, 0.6, 0.4, 0.25];
 </script>
 
-<div class="absolute right-4 top-4 z-30 flex flex-col items-end gap-2 overflow-hidden">
-	<div
-		class="flex items-center gap-3 rounded-xl border border-red-900/50 bg-black/80 px-5 py-3 shadow-2xl backdrop-blur"
-	>
-		<div class="text-right">
-			<div class="text-[10px] font-bold uppercase tracking-widest text-red-500">Combatants</div>
-			<div class="text-xs text-zinc-500">Remaining</div>
-		</div>
-		<div class="font-mono text-5xl font-black text-white tabular-nums">
-			{game.remainingCombatants}
-		</div>
-	</div>
-
-	<div class="flex flex-col gap-2 pt-2">
-		{#each game.killFeed as kill (kill.id)}
-			<div
-				animate:flip={{ duration: 300 }}
-				transition:fly|local={{ x: 50, duration: 300 }}
-				class="relative overflow-hidden rounded p-2"
-			>
-				<div class="flex items-baseline justify-end gap-2 text-sm text-zinc-200 text-shadow-xs">
-					{@html kill.msg}
-				</div>
+<div class="flex flex-col gap-2">
+	{#each game.killFeed as kill, i (kill.id)}
+		<div
+			animate:flip={{ duration: 300 }}
+			transition:fly|local={{ x: 50, duration: 300 }}
+			class="overflow-hidden rounded-lg border border-white/5 bg-black/75 px-3 py-2 shadow-lg backdrop-blur"
+			style="opacity: {FADE_OPACITIES[i] ?? 0.25}"
+		>
+			<div class="flex flex-wrap items-baseline justify-end gap-x-1 text-sm text-zinc-200">
+				{#each kill.parts as part, j (j)}
+					{#if 'token' in part}
+						<span
+							class={part.token === 'A'
+								? 'font-bold text-yellow-400'
+								: 'font-bold text-red-400'}
+						>
+							{part.token === 'A' ? kill.attacker : kill.victim}
+						</span>
+					{:else}
+						<span>{part.text}</span>
+					{/if}
+				{/each}
 			</div>
-		{/each}
-	</div>
+			<div class="mt-0.5 text-right font-mono text-[10px] text-zinc-600">
+				{formatMs(kill.gameTime)}
+			</div>
+		</div>
+	{/each}
 </div>

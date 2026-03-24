@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { fade, scale } from 'svelte/transition';
-  import { asset, resolve } from '$app/paths';
+	import { asset, resolve } from '$app/paths';
 	import { APP_VERSION } from '../app-metadata';
+	import Icon from './Icon.svelte';
 
 	type Props = {
 		onClose: () => void;
@@ -28,11 +29,11 @@
 						target="_blank"
 						class="flex items-center gap-1 text-blue-400 hover:text-blue-300 hover:underline"
 					>
-						📄 Open Rulebook (PDF)
+						<Icon name="file-text" size="14" /> Open Rulebook (PDF)
 					</a>
 				</div>
 			</div>
-			<div class="text-4xl hue-rotate-310 saturate-200">👑</div>
+			<div class="text-yellow-400"><Icon name="crown" size="36" /></div>
 		</div>
 
 		<div class="overflow-y-auto p-6 space-y-8 text-zinc-300">
@@ -88,7 +89,7 @@
 							on this.
 						</li>
 						<li class="bg-zinc-800 p-2 rounded border border-zinc-700">
-							<strong class="text-white block">🎨 Map & Atmosphere</strong>
+							<strong class="text-white flex items-center gap-1"><Icon name="palette" size="14" /> Map & Atmosphere</strong>
 							Select a <strong>Map Preset</strong> (Forest, Ruins, etc.) and a
 							<strong>Storm Theme</strong> (Fire, Ice, Toxic) to match your campaign.
 						</li>
@@ -111,7 +112,7 @@
 							<div
 								class="min-w-20 rounded border border-blue-900 bg-blue-900/20 p-2 text-center text-xs font-bold text-blue-400"
 							>
-								🎯 ZONE
+								<Icon name="crosshair" size="14" /> ZONE
 							</div>
 							<p>
 								Click the map to set the <strong>Center</strong> for the next safe zone. You can only
@@ -122,7 +123,7 @@
 							<div
 								class="min-w-20 rounded border border-yellow-900 bg-yellow-900/20 p-2 text-center text-xs font-bold text-yellow-500"
 							>
-								🎁 CHEST
+								<Icon name="gift" size="14" /> CHEST
 							</div>
 							<div>
 								<p class="mb-1">Click an empty square to place a <strong>2x2 Loot Area</strong>.</p>
@@ -146,12 +147,12 @@
 				<div class="ml-8 text-sm bg-zinc-800/50 p-4 rounded border border-zinc-800">
 					<ol class="list-decimal list-inside space-y-2">
 						<li>
-							Click <strong class="text-green-400">👁 REVEAL MAP</strong> when players are seated.
+							Click <strong class="text-green-400 inline-flex items-center gap-1"><Icon name="eye" size="13" /> REVEAL MAP</strong> when players are seated.
 						</li>
 						<li>Click <strong class="text-green-400">START GAME</strong> to begin the timer.</li>
 						<li>
 							<strong>Before</strong> the warning countdown appears, use
-							<strong class="text-blue-400">🎯 Zone Mode</strong> to click the map and set the next safe
+							<strong class="text-blue-400 inline-flex items-center gap-1"><Icon name="crosshair" size="13" /> Zone Mode</strong> to click the map and set the next safe
 							center.
 						</li>
 						<ul>

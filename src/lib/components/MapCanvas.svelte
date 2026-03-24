@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { GameEngine } from '$lib/game.svelte';
-	import { GRID_SIZE, STORM_THEMES } from '../game.config';
+	import { GRID_SIZE, STORM_THEMES, DEFAULT_SHRINK_DURATION_MS, QUALITY_STEPS_LOW, QUALITY_STEPS_MEDIUM } from '../game.config';
 
 	type Props = {
 		game: GameEngine;
@@ -14,7 +14,7 @@
 		game,
 		isDm = false,
 		mode = 'ZONE',
-		onSelectChest = (id: string | null) => {}
+		onSelectChest = () => {}
 	}: Props = $props();
 
 	// We track the Image's position on screen to align the SVG
@@ -31,8 +31,8 @@
 	let useFadeEdge = $derived(game.graphicsQuality === 'HIGH');
 	let zoneTransitionMs = $derived.by(() => {
 		if (game.graphicsQuality === 'HIGH') return 150; // frequent updates, short smoothing
-		if (game.graphicsQuality === 'MEDIUM') return Math.max(120, (game.shrinkDuration || 30000) / 60);
-		return Math.max(150, (game.shrinkDuration || 30000) / 30); // LOW, fewer updates, longer smoothing
+		if (game.graphicsQuality === 'MEDIUM') return Math.max(120, (game.shrinkDuration || DEFAULT_SHRINK_DURATION_MS) / QUALITY_STEPS_MEDIUM);
+		return Math.max(150, (game.shrinkDuration || DEFAULT_SHRINK_DURATION_MS) / QUALITY_STEPS_LOW); // LOW, fewer updates, longer smoothing
 	});
 
 	function updateMetrics() {
@@ -56,22 +56,20 @@
 	// Constants
 	const CELL_SIZE = 100 / GRID_SIZE;
 
-	function handleMapClick(e: MouseEvent) {
-		if (!isDm) return;
-
-		// 1. Calculate click relative to the IMAGE (metrics), not the screen
+	function getGridCoords(e: MouseEvent): { gridX: number; gridY: number; scaleX: number; scaleY: number } | null {
 		const relX = e.clientX - metrics.x;
 		const relY = e.clientY - metrics.y;
-
-		// 2. Convert to 0-100 scale
 		const scaleX = (relX / metrics.s) * 100;
 		const scaleY = (relY / metrics.s) * 100;
+		if (scaleX < 0 || scaleX > 100 || scaleY < 0 || scaleY > 100) return null;
+		return { gridX: Math.floor(scaleX / CELL_SIZE), gridY: Math.floor(scaleY / CELL_SIZE), scaleX, scaleY };
+	}
 
-		// 3. Ignore clicks outside the actual map image area
-		if (scaleX < 0 || scaleX > 100 || scaleY < 0 || scaleY > 100) return;
-
-		const gridX = Math.floor(scaleX / CELL_SIZE);
-		const gridY = Math.floor(scaleY / CELL_SIZE);
+	function handleMapClick(e: MouseEvent) {
+		if (!isDm) return;
+		const coords = getGridCoords(e);
+		if (!coords) return;
+		const { gridX, gridY } = coords;
 
 		if (mode === 'CHEST') {
 			// 1. Check if we clicked ON an existing chest
@@ -97,21 +95,12 @@
 
 	function handleMouseMove(e: MouseEvent) {
 		if (!isDm) return;
-
-		// 1. Calculate click relative to the IMAGE (metrics), not the screen
-		const relX = e.clientX - metrics.x;
-		const relY = e.clientY - metrics.y;
-
-		// 2. Convert to 0-100 scale
-		const scaleX = (relX / metrics.s) * 100;
-		const scaleY = (relY / metrics.s) * 100;
-
-		// 3. Ignore clicks outside the actual map image area
-		if (scaleX < 0 || scaleX > 100 || scaleY < 0 || scaleY > 100) return;
-
-		const gridX = Math.floor(scaleX / CELL_SIZE);
-		const gridY = Math.floor(scaleY / CELL_SIZE);
-
+		const coords = getGridCoords(e);
+		if (!coords) {
+			hoverCell = null;
+			return;
+		}
+		const { gridX, gridY } = coords;
 		if (gridX >= 0 && gridX < GRID_SIZE && gridY >= 0 && gridY < GRID_SIZE) {
 			hoverCell = { x: gridX, y: gridY };
 		} else {
@@ -282,16 +271,15 @@
 			{/if}
 			<!-- grid lines -->
 			<g stroke="white" stroke-opacity="0.15" stroke-width="0.1">
-				{#each Array(GRID_SIZE + 1) as _, i}
+				<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
+				{#each Array(GRID_SIZE + 1) as _, i (i)}
 					<line x1={i * CELL_SIZE} y1="0" x2={i * CELL_SIZE} y2="100" />
-				{/each}
-				{#each Array(GRID_SIZE + 1) as _, i}
 					<line x1="0" y1={i * CELL_SIZE} x2="100" y2={i * CELL_SIZE} />
 				{/each}
 			</g>
 
 			<!-- special areas -->
-			{#each game.specialAreas as area}
+			{#each game.specialAreas as area (area)}
 				<g
 					transform="translate({area.x * CELL_SIZE}, {area.y * CELL_SIZE})"
 					class="outline-0 cursor-pointer"
@@ -381,24 +369,10 @@
 </div>
 
 <style>
-	.animate-pulse {
-		animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-	}
-
 	.zone-circle,
 	.zone-circle-mask {
 		transition: cx var(--zone-transition, 200ms) linear, cy var(--zone-transition, 200ms) linear,
 			r var(--zone-transition, 200ms) linear;
 		will-change: cx cy r;
-	}
-
-	@keyframes pulse {
-		0%,
-		100% {
-			opacity: 1;
-		}
-		50% {
-			opacity: 0.2;
-		}
 	}
 </style>

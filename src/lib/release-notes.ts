@@ -60,6 +60,19 @@ export const ROADMAP: RoadmapItem[] = [
 // Generated from git commit history.
 export const RELEASES: ReleaseNotes[] = [
 	{
+		version: '1.0.5',
+		date: '2026-03-24',
+		summary: 'Kill feed on DM screen and manual kill trigger',
+		features: [
+			'Kill feed now visible on DM screen overlaid on the map',
+			'Manual "Trigger Kill" button in the DM kill tracker panel',
+			'Kill events now show the game timestamp they occurred at',
+			'Older kill feed entries fade out to keep focus on recent events',
+			'Killers are now always drawn from living combatants'
+		],
+		completedUpcoming: ['kill-feed']
+	},
+	{
 		version: '1.0.4',
 		date: '2025-12-19',
 		summary: 'Version screen to show app updates',

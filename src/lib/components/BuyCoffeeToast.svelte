@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 	import { DONATION_URL } from '../game.config';
+	import Icon from './Icon.svelte';
 	let { onClose } = $props();
 </script>
 
@@ -9,9 +10,9 @@
 	class="fixed bottom-6 right-6 z-100 flex max-w-md items-start gap-4 rounded-xl border border-yellow-500/30 bg-zinc-900/95 p-4 shadow-2xl shadow-black/50 backdrop-blur-md"
 >
 	<div
-		class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-yellow-400 to-yellow-600 text-xl text-black shadow-lg"
+		class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-yellow-400 to-yellow-600 text-black shadow-lg"
 	>
-		☕
+		<Icon name="coffee" size="20" />
 	</div>
 
 	<div class="flex-1 space-y-1">
@@ -22,7 +23,7 @@
 				class="ml-2 -mt-1 text-zinc-500 hover:text-white cursor-pointer"
 				aria-label="Dismiss"
 			>
-				✕
+				<Icon name="x" size="16" />
 			</button>
 		</div>
 
@@ -32,6 +33,7 @@
 
 		<a
 			href={DONATION_URL}
+			rel="external"
 			target="_blank"
 			class="mt-2 inline-flex items-center gap-2 text-md font-bold text-yellow-500 transition-colors hover:text-yellow-400 hover:underline"
 		>

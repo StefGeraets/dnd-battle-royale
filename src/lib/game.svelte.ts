@@ -1,5 +1,5 @@
 import { browser } from "$app/environment";
-import { generateSchedule, GRID_SIZE, STORM_THEMES } from "./game.config";
+import { generateSchedule, GRID_SIZE, STORM_THEMES, DEFAULT_SHRINK_DURATION_MS, QUALITY_STEPS_LOW, QUALITY_STEPS_MEDIUM, getDefaultState, STORAGE_KEYS } from "./game.config";
 import { getAverageColor } from "./utils/color";
 import { asset } from '$app/paths';
 import { SvelteSet } from "svelte/reactivity";
@@ -8,14 +8,19 @@ export type Point = {x: number; y: number };
 export type Zone = { x: number; y: number; r: number };
 export type SpecialArea = { id: string; x: number; y: number; name: string };
 export type GamePhase = 'IDLE' | 'WARNING' | 'SHRINKING' | 'STABLE';
-export type KillEvent = {id: string, msg: string, timestamp: number };
+export type KillEventPart = { text: string } | { token: 'A' | 'V' };
+export type KillEvent = { id: string; attacker: string; victim: string; parts: KillEventPart[]; timestamp: number; gameTime: number };
 export type GraphicsQuality = 'HIGH' | 'MEDIUM' | 'LOW';
 
 const SYNC_CHANNEL = 'dnd_royale_sync';
-const SAVE_KEY = 'dnd_royale_save_v1';
+
 const MAX_FEED_ITEMS = 5;
 const INITIAL_COMBATANTS = 100;
 const FINAL_SURVIVORS = 2;
+
+function generateUniqueId(): string {
+  return `${Date.now()}-${Math.floor(Math.random() * 1000000000)}`;
+}
 
 // Random Data Pools
 const NAMES = [
@@ -62,7 +67,7 @@ export class GameEngine {
   // Animation/Phase state
   phase = $state<GamePhase>('IDLE');
   shrinkStartTime = $state(0);
-  shrinkDuration = $state(30000);
+  shrinkDuration = $state(DEFAULT_SHRINK_DURATION_MS);
 
   totalGameHours = $state(2.5);
   secondsUntilShrink = $state(0);
@@ -80,6 +85,9 @@ export class GameEngine {
   stormThemeId = $state('fire');
   specialAreas = $state<SpecialArea[]>([]);
   graphicsQuality = $state<GraphicsQuality>('HIGH');
+
+  // Non-null when the engine has a fatal error the DM needs to act on
+  engineError = $state<string | null>(null);
 
   // COMPUTED VALUES
   distanceOutside = $derived.by(() => {
@@ -108,9 +116,9 @@ export class GameEngine {
 
     // Quantize progress for LOW quality to reduce update frequency
     if (this.graphicsQuality === 'LOW') {
-      p = Math.round(p * 30) / 30; // Update ~30 times during shrink instead of ~300
+      p = Math.round(p * QUALITY_STEPS_LOW) / QUALITY_STEPS_LOW;
     } else if (this.graphicsQuality === 'MEDIUM') {
-      p = Math.round(p * 60) / 60; // Update ~60 times during shrink
+      p = Math.round(p * QUALITY_STEPS_MEDIUM) / QUALITY_STEPS_MEDIUM;
     }
 
     // If finished, we could auto-switch phase, but usually safer to wait for a tick
@@ -151,10 +159,14 @@ export class GameEngine {
     try {
       // eslint-disable-next-line svelte/prefer-svelte-reactivity
       this.#worker = new Worker(new URL('./time-worker.ts', import.meta.url), { type: 'module' });
-      this.#worker.onerror = (err) => console.error('[GameEngine] Worker Error', err);
+      this.#worker.onerror = (err) => {
+        console.error('[GameEngine] Worker Error', err);
+        this.engineError = 'The game timer has crashed. The clock will not advance. Please reload the page.';
+      };
       this.#worker.onmessage = () => this.#tick();
     } catch (e) {
       console.error('[GameEngine] Failed to create worker:', e);
+      this.engineError = 'Failed to start the game timer. Please reload the page.';
     }
   
     this.#channel!.onmessage = (event) => {
@@ -280,7 +292,7 @@ export class GameEngine {
     }
 
     this.specialAreas.push({
-      id: `${Date.now()}-${Math.floor(Math.random() * 1000000000)}`,
+      id: generateUniqueId(),
       x: gridX,
       y: gridY,
       name: `Chest ${this.specialAreas.length + 1}`
@@ -340,31 +352,43 @@ export class GameEngine {
     }
   }
 
-  triggerRandomKill() {
-    const availableVictims = NAMES.filter((name) => !this.#deadVictims.has(name));
+  triggerManualKill() {
+    if (!this.#isDm) return;
+    this.triggerRandomKill();
+    this.#broadcast();
+    this.#saveState();
+  }
 
-    if (availableVictims.length === 0 || this.remainingCombatants <= FINAL_SURVIVORS) {
-      return;
+  triggerRandomKill() {
+    if (this.remainingCombatants <= FINAL_SURVIVORS) return;
+
+    // Recycle names once the pool is exhausted so kills can continue
+    // for all 100 combatants regardless of how many unique names exist.
+    if (this.#deadVictims.size >= NAMES.length) {
+      this.#deadVictims.clear();
     }
 
-    const attacker = NAMES[Math.floor(Math.random() * NAMES.length)];
-    let victim = availableVictims[Math.floor(Math.random() * availableVictims.length)];
-    
-    while (attacker === victim && availableVictims.length > 1) {
-      victim = availableVictims[Math.floor(Math.random() * availableVictims.length)];
-    };
+    const livingNames = NAMES.filter((name) => !this.#deadVictims.has(name));
+
+    const attacker = livingNames[Math.floor(Math.random() * livingNames.length)];
+    const victimPool = livingNames.filter((n) => n !== attacker);
+    const victim = victimPool.length > 0
+      ? victimPool[Math.floor(Math.random() * victimPool.length)]
+      : attacker;
     
     const template = KILL_TEMPLATES[Math.floor(Math.random() * KILL_TEMPLATES.length)];
 
-    const aHtml = `<span class="text-yellow-500 font-bold">${attacker}</span>`;
-    const vHtml = `<span class="text-red-400 font-bold">${victim}</span>`;
-    
-    const msg = template.replace(/{A}/g, aHtml).replace(/{V}/g, vHtml);
+    const parts: KillEventPart[] = template.split(/(\{A\}|\{V\})/g)
+      .filter(seg => seg !== '')
+      .map(seg => seg === '{A}' ? { token: 'A' as const } : seg === '{V}' ? { token: 'V' as const } : { text: seg });
 
     const newKill: KillEvent = {
-      id: `${Date.now()}-${Math.floor(Math.random() * 1000000000)}`,
-      msg,
-      timestamp: Date.now()
+      id: generateUniqueId(),
+      attacker,
+      victim,
+      parts,
+      timestamp: Date.now(),
+      gameTime: this.elapsedTime
     }
 
     this.killFeed = [newKill, ...this.killFeed].slice(0, MAX_FEED_ITEMS);
@@ -422,32 +446,31 @@ export class GameEngine {
   resetGame() {
     if (!this.#isDm) return;
 
-    localStorage.removeItem(SAVE_KEY);
+    localStorage.removeItem(STORAGE_KEYS.save);
 
-    this.elapsedTime = 0;
-    this.isRunning = false;
-    this.phase = 'IDLE';
-    this.shrinkStartTime = 0;
-    this.shrinkDuration = 3000;
-    this.secondsUntilShrink = 0;
-    this.nextRoundIndex = 0;
-    this.mapImage = asset('/islands.webp');
-    this.themeColor = '#3C5D68';
-    this.stormThemeId = 'fire';
-    this.totalGameHours = 2.5;
-    this.isPresenterHidden = true;
+    const data = getDefaultState();
+    this.elapsedTime = data.elapsedTime;
+    this.isRunning = data.isRunning;
+    this.phase = data.phase;
+    this.shrinkStartTime = data.shrinkStartTime;
+    this.shrinkDuration = data.shrinkDuration;
+    this.secondsUntilShrink = data.secondsUntilShrink;
+    this.nextRoundIndex = data.nextRoundIndex;
+    this.mapImage = data.mapImage;
+    this.themeColor = data.themeColor;
+    this.stormThemeId = data.stormThemeId;
+    this.totalGameHours = data.totalGameHours;
+    this.isPresenterHidden = data.isPresenterHidden;
     this.remainingCombatants = INITIAL_COMBATANTS;
-    this.schedule = generateSchedule(2.5);
+    this.schedule = data.schedule;
     this.specialAreas = [];
-    this.playerPos = {x: 1, y: 1};
-    this.activeZone = {x: 50, y: 50, r: 150};
-    this.targetZone = {x: 50, y: 50, r: 150};
+    this.playerPos = data.playerPos;
+    this.activeZone = data.activeZone;
+    this.targetZone = data.targetZone;
     this.killFeed = [];
+    this.graphicsQuality = data.graphicsQuality;
     this.#killsTriggered = 0;
     this.#deadVictims = new SvelteSet();
-    this.graphicsQuality = 'HIGH';
-
-    // window.location.reload();
   }
 
   #broadcast() {
@@ -508,13 +531,13 @@ export class GameEngine {
       timestamp: Date.now(),
     }
 
-    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    localStorage.setItem(STORAGE_KEYS.save, JSON.stringify(data));
   }
 
   #loadState() {
     if (!this.#isDm) return;
 
-    const raw = localStorage.getItem(SAVE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEYS.save);
     if (!raw) return;
 
     try {
@@ -522,27 +545,27 @@ export class GameEngine {
       console.log('[GameEngine] Restoring saved game...', data);
 
       // Restore all state
-      this.elapsedTime = data.elapsedTime;
-      this.playerPos = data.playerPos;
-      this.activeZone = data.activeZone;
-      this.targetZone = data.targetZone;
-      this.phase = data.phase;
-      this.shrinkStartTime = data.shrinkStartTime;
-      this.shrinkDuration = data.shrinkDuration;
-      this.secondsUntilShrink = data.secondsUntilShrink;
-      this.nextRoundIndex = data.nextRoundIndex;
-      this.totalGameHours = data.totalGameHours || 2.5;
-      this.isPresenterHidden = data.isPresenterHidden || true;
-      this.schedule = data.schedule || generateSchedule(this.totalGameHours);
-      this.mapImage = data.mapImage || this.mapImage;
-      this.themeColor = data.themeColor || this.themeColor;
-      this.stormThemeId = data.stormThemeId || this.stormThemeId;
-      this.specialAreas = data.specialAreas || [];
-      this.remainingCombatants = data.remainingCombatants || INITIAL_COMBATANTS;
-      this.killFeed = data.killFeed || [];
-      this.#killsTriggered = data.killsTriggered;
-      this.#deadVictims = new SvelteSet(data.deadVictims || []);
-      this.graphicsQuality = data.graphicsQuality || 'HIGH';
+      this.elapsedTime = data.elapsedTime ?? 0;
+      this.playerPos = data.playerPos ?? { x: 1, y: 1 };
+      this.activeZone = data.activeZone ?? { x: 50, y: 50, r: 150 };
+      this.targetZone = data.targetZone ?? { x: 50, y: 50, r: 150 };
+      this.phase = data.phase ?? 'IDLE';
+      this.shrinkStartTime = data.shrinkStartTime ?? 0;
+      this.shrinkDuration = data.shrinkDuration ?? DEFAULT_SHRINK_DURATION_MS;
+      this.secondsUntilShrink = data.secondsUntilShrink ?? 0;
+      this.nextRoundIndex = data.nextRoundIndex ?? 0;
+      this.totalGameHours = data.totalGameHours ?? 2.5;
+      this.isPresenterHidden = data.isPresenterHidden ?? true;
+      this.schedule = data.schedule ?? generateSchedule(this.totalGameHours);
+      this.mapImage = data.mapImage ?? this.mapImage;
+      this.themeColor = data.themeColor ?? this.themeColor;
+      this.stormThemeId = data.stormThemeId ?? this.stormThemeId;
+      this.specialAreas = data.specialAreas ?? [];
+      this.remainingCombatants = data.remainingCombatants ?? INITIAL_COMBATANTS;
+      this.killFeed = data.killFeed ?? [];
+      this.#killsTriggered = data.killsTriggered ?? 0;
+      this.#deadVictims = new SvelteSet(data.deadVictims ?? []);
+      this.graphicsQuality = data.graphicsQuality ?? 'HIGH';
       
       // Note: We do NOT restore 'isRunning'. 
       // It is safer to start PAUSED after a reload so the DM can get their bearings.

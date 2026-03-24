@@ -2,6 +2,13 @@ import { asset } from '$app/paths';
 
 export const GRID_SIZE = 24;
 
+// Default shrink animation duration in milliseconds
+export const DEFAULT_SHRINK_DURATION_MS = 30000;
+
+// Animation quantization steps per quality tier (higher = smoother)
+export const QUALITY_STEPS_LOW = 30;
+export const QUALITY_STEPS_MEDIUM = 60;
+
 export type RoundConfig = {
 	id: number;
 	triggerTime: number; // In Minutes
@@ -116,7 +123,7 @@ export const MAP_PRESETS = [
     url: asset('/lakes.webp'), 
     color: '#CAA86B' 
   },
-  // { 
+  // { Implement later
   //   id: 'ice', 
   //   label: 'Fjord Blizzard', 
   //   url: asset('/fjord.webp'), 
@@ -125,3 +132,38 @@ export const MAP_PRESETS = [
 ];
 
 export const DONATION_URL = "https://buymeacoffee.com/StefBuilds";
+
+/**
+ * Single source of truth for all resettable game state defaults.
+ * Used by GameEngine field initializers and resetGame().
+ */
+export function getDefaultState() {
+  return {
+    elapsedTime: 0,
+    isRunning: false,
+    playerPos: { x: 1, y: 1 },
+    activeZone: { x: 50, y: 50, r: 150 },
+    targetZone: { x: 50, y: 50, r: 150 },
+    phase: 'IDLE' as const,
+    shrinkStartTime: 0,
+    shrinkDuration: DEFAULT_SHRINK_DURATION_MS,
+    totalGameHours: 2.5,
+    secondsUntilShrink: 0,
+    isPresenterHidden: true,
+    schedule: generateSchedule(2.5),
+    nextRoundIndex: 0,
+    remainingCombatants: 100, // INITIAL_COMBATANTS — duplicated to avoid circular import
+    killFeed: [] as never[],
+    mapImage: asset('/islands.webp'),
+    themeColor: '#3C5D68',
+    stormThemeId: 'fire',
+    specialAreas: [] as never[],
+    graphicsQuality: 'HIGH' as const,
+  };
+}
+
+export const STORAGE_KEYS = {
+  save: 'dnd_royale_save_v1',
+  onboardingSeen: 'dm_onboarding_seen',
+  versionSeen: 'dm_version_seen',
+} as const;
