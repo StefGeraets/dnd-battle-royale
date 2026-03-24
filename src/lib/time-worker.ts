@@ -11,7 +11,7 @@ self.onmessage = (e) => {
         if (interval) clearTimeout(interval); 
         interval = setTimeout(step, TICK_RATE);
     } 
-    else if (action === 'STOP') {
+    else if (action === 'STOP' && interval !== null) {
         clearTimeout(interval);
     }
 };

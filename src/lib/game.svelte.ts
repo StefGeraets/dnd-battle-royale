@@ -9,7 +9,7 @@ export type Zone = { x: number; y: number; r: number };
 export type SpecialArea = { id: string; x: number; y: number; name: string };
 export type GamePhase = 'IDLE' | 'WARNING' | 'SHRINKING' | 'STABLE';
 export type KillEventPart = { text: string } | { token: 'A' | 'V' };
-export type KillEvent = { id: string; attacker: string; victim: string; parts: KillEventPart[]; timestamp: number };
+export type KillEvent = { id: string; attacker: string; victim: string; parts: KillEventPart[]; timestamp: number; gameTime: number };
 export type GraphicsQuality = 'HIGH' | 'MEDIUM' | 'LOW';
 
 const SYNC_CHANNEL = 'dnd_royale_sync';
@@ -352,19 +352,29 @@ export class GameEngine {
     }
   }
 
-  triggerRandomKill() {
-    const availableVictims = NAMES.filter((name) => !this.#deadVictims.has(name));
+  triggerManualKill() {
+    if (!this.#isDm) return;
+    this.triggerRandomKill();
+    this.#broadcast();
+    this.#saveState();
+  }
 
-    if (availableVictims.length === 0 || this.remainingCombatants <= FINAL_SURVIVORS) {
-      return;
+  triggerRandomKill() {
+    if (this.remainingCombatants <= FINAL_SURVIVORS) return;
+
+    // Recycle names once the pool is exhausted so kills can continue
+    // for all 100 combatants regardless of how many unique names exist.
+    if (this.#deadVictims.size >= NAMES.length) {
+      this.#deadVictims.clear();
     }
 
-    const attacker = NAMES[Math.floor(Math.random() * NAMES.length)];
-    let victim = availableVictims[Math.floor(Math.random() * availableVictims.length)];
-    
-    while (attacker === victim && availableVictims.length > 1) {
-      victim = availableVictims[Math.floor(Math.random() * availableVictims.length)];
-    };
+    const livingNames = NAMES.filter((name) => !this.#deadVictims.has(name));
+
+    const attacker = livingNames[Math.floor(Math.random() * livingNames.length)];
+    const victimPool = livingNames.filter((n) => n !== attacker);
+    const victim = victimPool.length > 0
+      ? victimPool[Math.floor(Math.random() * victimPool.length)]
+      : attacker;
     
     const template = KILL_TEMPLATES[Math.floor(Math.random() * KILL_TEMPLATES.length)];
 
@@ -377,7 +387,8 @@ export class GameEngine {
       attacker,
       victim,
       parts,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      gameTime: this.elapsedTime
     }
 
     this.killFeed = [newKill, ...this.killFeed].slice(0, MAX_FEED_ITEMS);

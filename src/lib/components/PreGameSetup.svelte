@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { GameEngine } from '../game.svelte';
 	import MapSettings from './MapSettings.svelte';
+	import Icon from './Icon.svelte';
 
 	type Props = {
 		game: GameEngine;
@@ -49,7 +50,7 @@
 			class="w-full py-2 px-3 rounded text-sm font-bold bg-zinc-700 hover:bg-zinc-600 text-zinc-200 flex items-center justify-center gap-2"
 			onclick={() => onModeChange('CHEST')}
 		>
-			🎁 Place Loot Chests
+			<Icon name="gift" size="16" /> Place Loot Chests
 		</button>
 		{#if mode === 'CHEST'}
 			<p class="text-[10px] text-yellow-500/80 mt-1 text-center animate-pulse">
@@ -66,7 +67,11 @@
 				: 'bg-green-600 hover:bg-green-500'}"
 			onclick={() => game.togglePresenterCurtain()}
 		>
-			{game.isPresenterHidden ? '👁 REVEAL MAP' : '🙈 HIDE MAP'}
+			{#if game.isPresenterHidden}
+			<Icon name="eye" size="16" /> REVEAL MAP
+		{:else}
+			<Icon name="eye-off" size="16" /> HIDE MAP
+		{/if}
 		</button>
 	</div>
 

@@ -9,7 +9,9 @@
 	import PreGameSetup from '$lib/components/PreGameSetup.svelte';
 	import MissionClock from '$lib/components/MissionClock.svelte';
 	import InteractionMode from '$lib/components/InteractionMode.svelte';
-	// import KillFeed from '$lib/components/KillFeed.svelte';
+	import CombatantCounter from '$lib/components/CombatantCounter.svelte';
+	import KillFeed from '$lib/components/KillFeed.svelte';
+	import Icon from '$lib/components/Icon.svelte';
 	import { fly, slide } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import { asset } from '$app/paths';
@@ -108,7 +110,7 @@
 		<div
 			class="fixed top-0 inset-x-0 z-200 flex items-center gap-3 bg-red-700 px-4 py-2 text-sm text-white shadow-lg"
 		>
-			<span class="font-bold shrink-0">⚠ Engine Error</span>
+			<span class="font-bold shrink-0 flex items-center gap-1"><Icon name="alert-triangle" size="16" /> Engine Error</span>
 			<span class="grow">{game.engineError}</span>
 			<button
 				class="shrink-0 rounded bg-white/20 px-3 py-1 font-bold hover:bg-white/30"
@@ -127,8 +129,6 @@
 			}}
 		/>
 	{/if}
-
-	<!-- <KillFeed {game} /> -->
 
 	<CountdownOverlay {game} />
 
@@ -171,7 +171,7 @@
 					transition:fly={{ y: -20 }}
 					class="animate-pulse rounded border-2 border-red-600 bg-red-800 p-3 text-center shadow-xl"
 				>
-					<div class="text-xs font-bold uppercase text-red-200">⚠ Party in Storm</div>
+					<div class="text-xs font-bold uppercase text-red-200 flex items-center justify-center gap-1"><Icon name="alert-triangle" size="14" /> Party in Storm</div>
 					<div class="text-2xl font-black text-white">
 						{(game.distanceOutside * 5).toFixed(0)} ft
 					</div>
@@ -194,6 +194,18 @@
 				onClearSelection={() => (selectedChestId = null)}
 			/>
 
+			<div class="rounded border border-zinc-700 bg-zinc-900 p-4 shadow-lg">
+				<h2 class="mb-3 text-xs font-bold uppercase text-zinc-500">Kill Tracker</h2>
+				<CombatantCounter {game} />
+				<button
+					class="mt-3 w-full rounded py-2 text-sm font-bold transition-colors bg-zinc-800 text-zinc-300 hover:bg-red-900 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
+					disabled={game.remainingCombatants <= 2}
+					onclick={() => game.triggerManualKill()}
+				>
+					<Icon name="skull" size="16" /> Trigger Kill
+				</button>
+			</div>
+
 			<div class="mt-auto pt-4 border-t border-zinc-800">
 				<button
 					class="w-full text-xs text-red-400 bg-red-700/20 hover:text-red-500 hover:bg-red-950/30 p-2 rounded transition-colors border border-transparent hover:border-red-900/50"
@@ -203,13 +215,18 @@
 						}
 					}}
 				>
-					⚠ RESET CAMPAIGN
+					<Icon name="alert-triangle" size="14" /> RESET CAMPAIGN
 				</button>
 			</div>
 		</div>
 
-		<div class="flex-1 flex items-center justify-center rounded-xl shadow-inner">
+		<div class="relative flex-1 flex items-center justify-center rounded-xl shadow-inner">
 			<MapCanvas {game} isDm={true} {mode} onSelectChest={selectChest} />
+			{#if game.killFeed.length > 0}
+				<div class="absolute right-4 top-4 z-30 flex flex-col items-end gap-2">
+					<KillFeed {game} />
+				</div>
+			{/if}
 		</div>
 	</div>
 

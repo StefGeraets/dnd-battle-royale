@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { GameEngine } from '$lib/game.svelte';
 	import { MAP_PRESETS, STORM_THEMES } from '../game.config';
+	import Icon from './Icon.svelte';
 
 	type Props = {
 		game: GameEngine;
@@ -37,7 +38,7 @@
 	<h2 class="flex justify-between text-xs font-bold uppercase tracking-wider text-gray-400">
 		<span>Map & Atmosphere</span>
 		{#if isLocked}
-			<span class="text-red-500 flex items-center gap-1">🔒 Locked</span>
+			<span class="text-red-500 flex items-center gap-1"><Icon name="lock" size="0.9em" /> Locked</span>
 		{/if}
 	</h2>
 

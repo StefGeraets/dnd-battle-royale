@@ -14,7 +14,7 @@
 		game,
 		isDm = false,
 		mode = 'ZONE',
-		onSelectChest = (id: string | null) => {}
+		onSelectChest = () => {}
 	}: Props = $props();
 
 	// We track the Image's position on screen to align the SVG

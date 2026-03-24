@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { GameEngine, SpecialArea } from '../game.svelte';
 	import { fly, slide } from 'svelte/transition';
+	import Icon from './Icon.svelte';
 
 	type Props = {
 		game: GameEngine;
@@ -23,7 +24,7 @@
 				: 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'}"
 			onclick={() => onModeChange('ZONE')}
 		>
-			🎯 Move Zone
+			<Icon name="crosshair" size="16" /> Move Zone
 		</button>
 		<button
 			class="flex-1 py-2 text-sm font-bold rounded transition-colors {mode === 'CHEST'
@@ -31,11 +32,11 @@
 				: 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'}"
 			onclick={() => onModeChange('CHEST')}
 		>
-			🎁 Add Chest
+			<Icon name="gift" size="16" /> Add Chest
 		</button>
 	</div>
 
-	<div class="mt-3 min-h-[60px]">
+	<div class="mt-3 min-h-15">
 		{#if selectedChest && mode === 'CHEST'}
 			<div
 				transition:fly={{ y: -10, duration: 200 }}
