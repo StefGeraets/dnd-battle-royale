@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 	import { onMount } from 'svelte';
-	import { APP_VERSION } from '$lib/app-metadata';
-	import { latestRelease, RELEASES, ROADMAP, type RoadmapItem } from '$lib/release-notes';
-	import { STORAGE_KEYS } from '$lib/game.config';
-	import Icon from '$lib/components/Icon.svelte';
+	import { APP_VERSION } from '#lib/app-metadata.js';
+	import { latestRelease, RELEASES, ROADMAP, type RoadmapItem } from '#lib/release-notes.js';
+	import { STORAGE_KEYS } from '#lib/game.config.js';
+	import Icon from '#lib/components/Icon.svelte';
 	import { SvelteSet } from 'svelte/reactivity';
 
 	const appVersion: string = APP_VERSION;
@@ -39,9 +39,8 @@
 
 	function close() {
 		show = false;
-		
-    localStorage.setItem(STORAGE_KEYS.versionSeen, appVersion);
-		
+
+		localStorage.setItem(STORAGE_KEYS.versionSeen, appVersion);
 	}
 </script>
 

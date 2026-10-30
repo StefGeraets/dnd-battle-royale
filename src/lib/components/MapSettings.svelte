@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { GameEngine } from '$lib/game.svelte';
+	import type { GameEngine } from '#lib/game.svelte.js';
 	import { MAP_PRESETS, STORM_THEMES } from '../game.config';
 	import Icon from './Icon.svelte';
 

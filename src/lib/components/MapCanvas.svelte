@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { GameEngine } from '$lib/game.svelte';
+	import { GameEngine } from '#lib/game.svelte.js';
 	import {
 		GRID_SIZE,
 		STORM_THEMES,

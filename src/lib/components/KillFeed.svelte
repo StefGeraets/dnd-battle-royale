@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
-	import type { GameEngine } from '$lib/game.svelte';
-	import { formatMs } from '$lib/utils/time';
+	import type { GameEngine } from '#lib/game.svelte.js';
+	import { formatMs } from '#lib/utils/time.js';
 
 	type Props = { game: GameEngine };
 	let { game }: Props = $props();

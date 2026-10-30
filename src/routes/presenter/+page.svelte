@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { GameEngine } from '$lib/game.svelte';
-	import MapCanvas from '$lib/components/MapCanvas.svelte';
-	import PresenterCurtain from '$lib/components/PresenterCurtain.svelte';
-	import CountdownOverlay from '$lib/components/CountdownOverlay.svelte';
+	import { GameEngine } from '#lib/game.svelte.js';
+	import MapCanvas from '#lib/components/MapCanvas.svelte';
+	import PresenterCurtain from '#lib/components/PresenterCurtain.svelte';
+	import CountdownOverlay from '#lib/components/CountdownOverlay.svelte';
 	import { onMount } from 'svelte';
-	import KillFeed from '$lib/components/KillFeed.svelte';
-	import CombatantCounter from '$lib/components/CombatantCounter.svelte';
-	import Icon from '$lib/components/Icon.svelte';
+	import KillFeed from '#lib/components/KillFeed.svelte';
+	import CombatantCounter from '#lib/components/CombatantCounter.svelte';
+	import Icon from '#lib/components/Icon.svelte';
 
 	// Initialize Engine as Presenter (Replica)
 	const game = new GameEngine(false);
@@ -23,13 +23,13 @@
 
 	function toggleFullscreen() {
 		if (!document.fullscreenElement) {
-			document.documentElement.requestFullscreen().catch((e) =>
-				console.warn('[Presenter] Fullscreen request denied:', e)
-			);
+			document.documentElement
+				.requestFullscreen()
+				.catch((e) => console.warn('[Presenter] Fullscreen request denied:', e));
 		} else {
-			document.exitFullscreen().catch((e) =>
-				console.warn('[Presenter] Exit fullscreen failed:', e)
-			);
+			document
+				.exitFullscreen()
+				.catch((e) => console.warn('[Presenter] Exit fullscreen failed:', e));
 		}
 	}
 </script>

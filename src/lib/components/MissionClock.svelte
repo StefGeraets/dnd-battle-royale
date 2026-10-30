@@ -41,7 +41,8 @@
 				{#if game.phase === 'SHRINKING'}
 					<div
 						class="h-full bg-red-500 transition-all duration-100 ease-linear"
-						style="width: {((game.elapsedTime - game.shrinkStartTime) / game.shrinkDuration) * 100}%"
+						style="width: {((game.elapsedTime - game.shrinkStartTime) / game.shrinkDuration) *
+							100}%"
 					></div>
 				{:else if game.nextRound}
 					{@const total = game.nextRound.triggerTime * 60 * 1000}

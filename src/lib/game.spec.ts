@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GameEngine } from './game.svelte';
 import { FINAL_SURVIVORS, INITIAL_COMBATANTS, STORAGE_KEYS } from './game.config';
 
-vi.mock('$app/environment', () => ({ browser: true }));
+vi.mock('$app/env', () => ({ browser: true }));
 
 // Delivers messages to every other open channel, like BroadcastChannel across tabs
 class FakeChannel {

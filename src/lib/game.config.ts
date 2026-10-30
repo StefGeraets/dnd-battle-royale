@@ -134,19 +134,19 @@ export const MAP_PRESETS = [
 	{
 		id: 'islands',
 		label: 'Rayrock Isles',
-		url: asset('/islands.webp'),
+		url: asset('islands.webp'),
 		color: '#3C5D68'
 	},
 	{
 		id: 'lava',
 		label: 'Moltenrock Peaks',
-		url: asset('/marwen.webp'),
+		url: asset('marwen.webp'),
 		color: '#FFE900'
 	},
 	{
 		id: 'lake',
 		label: 'Northern Lakes',
-		url: asset('/lakes.webp'),
+		url: asset('lakes.webp'),
 		color: '#CAA86B'
 	}
 	// { Implement later
@@ -180,7 +180,7 @@ export function getDefaultState() {
 		nextRoundIndex: 0,
 		remainingCombatants: INITIAL_COMBATANTS,
 		killFeed: [] as KillEvent[],
-		mapImage: asset('/islands.webp'),
+		mapImage: asset('islands.webp'),
 		themeColor: '#3C5D68',
 		stormThemeId: 'fire',
 		specialAreas: [] as SpecialArea[],

@@ -45,11 +45,12 @@ export const ROADMAP: RoadmapItem[] = [
 	},
 	{
 		id: '',
-		label: '',
+		label: ''
 	},
 	{
 		id: 'storm-quality',
-		label: 'DM is able to adjust the quality of the storm for smooth rendering on less powerfull pc\'s'
+		label:
+			"DM is able to adjust the quality of the storm for smooth rendering on less powerfull pc's"
 	},
 	{
 		id: 'map-presets',
@@ -76,9 +77,7 @@ export const RELEASES: ReleaseNotes[] = [
 		version: '1.0.4',
 		date: '2025-12-19',
 		summary: 'Version screen to show app updates',
-		features: [
-			'Version overlay with release notes and roadmap tracking'
-		],
+		features: ['Version overlay with release notes and roadmap tracking'],
 		completedUpcoming: []
 	},
 	{
@@ -99,7 +98,7 @@ export const RELEASES: ReleaseNotes[] = [
 			'Graphics quality controls (High / Medium / Low) for storm rendering',
 			'Performance-friendly storm rendering with adjustable quality levels',
 			'Improved storm animation smoothing across quality levels',
-			'Fixed reset campaign functionality (countdown overlay now shows correctly)',
+			'Fixed reset campaign functionality (countdown overlay now shows correctly)'
 		],
 		completedUpcoming: ['storm-quality']
 	},
@@ -159,5 +158,3 @@ export const RELEASES: ReleaseNotes[] = [
 ];
 
 export const latestRelease = RELEASES[0];
-
-
