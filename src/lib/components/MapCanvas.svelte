@@ -39,6 +39,14 @@
 		return Math.max(150, (game.shrinkDuration || DEFAULT_SHRINK_DURATION_MS) / QUALITY_STEPS_LOW); // LOW, fewer updates, longer smoothing
 	});
 
+	// Zone in screen pixels, shared by the storm mask and the ring glow
+	let zoneVars = $derived(
+		`--zx: ${metrics.x + (game.currentZone.x * metrics.s) / 100}px;` +
+			`--zy: ${metrics.y + (game.currentZone.y * metrics.s) / 100}px;` +
+			`--zr: ${(game.currentZone.r * metrics.s) / 100}px;` +
+			`--zone-transition: ${zoneTransitionMs}ms`
+	);
+
 	function updateMetrics() {
 		if (mapImageEl) {
 			const rect = mapImageEl.getBoundingClientRect();
@@ -150,11 +158,8 @@
 	<!-- Storm layers are composited once (will-change); only the CSS mask moves during a shrink -->
 	<div
 		class="storm pointer-events-none fixed inset-0 z-10"
-		style:--zx="{metrics.x + (game.currentZone.x * metrics.s) / 100}px"
-		style:--zy="{metrics.y + (game.currentZone.y * metrics.s) / 100}px"
-		style:--zr="{(game.currentZone.r * metrics.s) / 100}px"
+		style={zoneVars}
 		style:--edge={useFadeEdge ? '90%' : '100%'}
-		style:--zone-transition="{zoneTransitionMs}ms"
 	>
 		{#if useSvgFog}
 			<svg class="absolute inset-0 h-full w-full opacity-90 will-change-transform">
@@ -184,6 +189,16 @@
 			style:background-color={theme.secondary}
 		></div>
 	</div>
+
+	<!-- Ring glow as a gradient; a blur filter on the ring re-rasterized the whole overlay every frame -->
+	{#if useGlow && game.currentZone.r > 0}
+		<div
+			class="ring-glow pointer-events-none fixed inset-0 z-10 will-change-transform"
+			style={zoneVars}
+			style:--glow="{(4 * metrics.s) / 100}px"
+			style:--accent={theme.accent}
+		></div>
+	{/if}
 
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
@@ -278,20 +293,6 @@
 				</g>
 			{/if}
 
-			<!-- Wide faint stroke as glow; a blur filter here re-rasterized the whole overlay every frame -->
-			{#if useGlow}
-				<circle
-					cx={game.currentZone.x}
-					cy={game.currentZone.y}
-					r={game.currentZone.r}
-					fill="none"
-					stroke={theme.accent}
-					stroke-width="2"
-					stroke-opacity="0.25"
-					class="transition-colors duration-1000 zone-circle"
-					style={`--zone-transition: ${zoneTransitionMs}ms`}
-				/>
-			{/if}
 			<circle
 				cx={game.currentZone.x}
 				cy={game.currentZone.y}
@@ -340,12 +341,27 @@
 		initial-value: 0px;
 	}
 
+	.ring-glow {
+		background: radial-gradient(
+			circle var(--zr) at var(--zx) var(--zy),
+			transparent max(0px, calc(var(--zr) - var(--glow))),
+			color-mix(in srgb, var(--accent) 12%, transparent) calc(var(--zr) - var(--glow) / 2),
+			color-mix(in srgb, var(--accent) 40%, transparent) var(--zr),
+			color-mix(in srgb, var(--accent) 12%, transparent) calc(var(--zr) + var(--glow) / 2),
+			transparent calc(var(--zr) + var(--glow))
+		);
+	}
+
 	.storm {
 		mask-image: radial-gradient(
 			circle var(--zr) at var(--zx) var(--zy),
 			transparent var(--edge),
 			black 100%
 		);
+	}
+
+	.storm,
+	.ring-glow {
 		transition:
 			--zx var(--zone-transition, 200ms) linear,
 			--zy var(--zone-transition, 200ms) linear,
