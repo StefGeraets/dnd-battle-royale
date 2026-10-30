@@ -40,7 +40,7 @@
 >
 	<MapCanvas {game} isDm={false} />
 
-	<div class="absolute right-4 top-4 z-30 flex flex-col items-end gap-2">
+	<div class="absolute right-4 top-4 z-30 flex flex-col items-end gap-2 overflow-hidden">
 		<CombatantCounter {game} />
 		<KillFeed {game} />
 	</div>
@@ -53,7 +53,7 @@
 		<button
 			class="fixed bottom-4 right-4 z-100 bg-white/10 hover:bg-white/20 text-white text-xs px-3 py-1 rounded backdrop-blur border border-white/20 transition-opacity"
 			aria-label="Enter fullscreen"
-		onclick={toggleFullscreen}><Icon name="arrows-maximize" size="14" /> Fullscreen</button
+			onclick={toggleFullscreen}><Icon name="arrows-maximize" size="14" /> Fullscreen</button
 		>
 	{/if}
 </div>

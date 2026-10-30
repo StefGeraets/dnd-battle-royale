@@ -220,7 +220,7 @@
 			</div>
 		</div>
 
-		<div class="relative flex-1 flex items-center justify-center rounded-xl shadow-inner">
+		<div class="relative flex-1 flex items-center justify-center rounded-xl shadow-inner overflow-hidden">
 			<MapCanvas {game} isDm={true} {mode} onSelectChest={selectChest} />
 			{#if game.killFeed.length > 0}
 				<div class="absolute right-4 top-4 z-30 flex flex-col items-end gap-2">

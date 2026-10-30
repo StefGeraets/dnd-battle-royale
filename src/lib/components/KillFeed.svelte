@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
-	import { flip } from 'svelte/animate';
 	import type { GameEngine } from '$lib/game.svelte';
 	import { formatMs } from '$lib/utils/time';
 
@@ -14,7 +13,6 @@
 <div class="flex flex-col gap-2">
 	{#each game.killFeed as kill, i (kill.id)}
 		<div
-			animate:flip={{ duration: 300 }}
 			transition:fly|local={{ x: 50, duration: 300 }}
 			class="overflow-hidden rounded-lg border border-white/5 bg-black/75 px-3 py-2 shadow-lg backdrop-blur"
 			style="opacity: {FADE_OPACITIES[i] ?? 0.25}"

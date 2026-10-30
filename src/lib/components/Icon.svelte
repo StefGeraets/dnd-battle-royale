@@ -41,7 +41,6 @@
 	};
 </script>
 
-<!-- svelte-ignore a11y_consider_explicit_label -->
 <svg
 	xmlns="http://www.w3.org/2000/svg"
 	width={size}
@@ -55,5 +54,6 @@
 	class="inline-block shrink-0 {cls}"
 	aria-hidden="true"
 >
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 	{@html paths[name]}
 </svg>
