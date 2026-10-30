@@ -14,16 +14,14 @@
 	{#each game.killFeed as kill, i (kill.id)}
 		<div
 			transition:fly|local={{ x: 50, duration: 300 }}
-			class="overflow-hidden rounded-lg border border-white/5 bg-black/75 px-3 py-2 shadow-lg backdrop-blur"
+			class="overflow-hidden rounded-lg border border-white/5 bg-black/75 px-3 py-2 shadow-lg"
 			style="opacity: {FADE_OPACITIES[i] ?? 0.25}"
 		>
 			<div class="flex flex-wrap items-baseline justify-end gap-x-1 text-sm text-zinc-200">
 				{#each kill.parts as part, j (j)}
 					{#if 'token' in part}
 						<span
-							class={part.token === 'A'
-								? 'font-bold text-yellow-400'
-								: 'font-bold text-red-400'}
+							class={part.token === 'A' ? 'font-bold text-yellow-400' : 'font-bold text-red-400'}
 						>
 							{part.token === 'A' ? kill.attacker : kill.victim}
 						</span>

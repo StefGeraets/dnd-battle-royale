@@ -27,8 +27,7 @@
 
 	// Quality-based optimizations
 	let useSvgFog = $derived(game.graphicsQuality === 'HIGH');
-	let useSvgMask = $derived(game.graphicsQuality === 'HIGH');
-	let useGlowFilter = $derived(game.graphicsQuality !== 'LOW');
+	let useGlow = $derived(game.graphicsQuality !== 'LOW');
 	let useFadeEdge = $derived(game.graphicsQuality === 'HIGH');
 	let zoneTransitionMs = $derived.by(() => {
 		if (game.graphicsQuality === 'HIGH') return 150; // frequent updates, short smoothing
@@ -148,19 +147,17 @@
 		onload={updateMetrics}
 	/>
 
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-	<svg
-		class="fixed inset-0 z-10 h-full w-full {isDm
-			? 'cursor-crosshair pointer-events-auto'
-			: 'pointer-events-none'}"
-		onclick={handleMapClick}
-		onmousemove={handleMouseMove}
-		onmouseleave={handleMouseLeave}
-		role="application"
+	<!-- Storm layers are composited once (will-change); only the CSS mask moves during a shrink -->
+	<div
+		class="storm pointer-events-none fixed inset-0 z-10"
+		style:--zx="{metrics.x + (game.currentZone.x * metrics.s) / 100}px"
+		style:--zy="{metrics.y + (game.currentZone.y * metrics.s) / 100}px"
+		style:--zr="{(game.currentZone.r * metrics.s) / 100}px"
+		style:--edge={useFadeEdge ? '90%' : '100%'}
+		style:--zone-transition="{zoneTransitionMs}ms"
 	>
-		<defs>
-			{#if useSvgFog}
+		{#if useSvgFog}
+			<svg class="absolute inset-0 h-full w-full opacity-90 will-change-transform">
 				<filter id="storm-fog" x="0%" y="0%" width="100%" height="100%">
 					<feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" result="noise" />
 					<feColorMatrix
@@ -174,98 +171,31 @@
 					/>
 					<feComposite operator="in" in="coloredNoise" in2="SourceGraphic" result="composite" />
 				</filter>
-			{/if}
-
-			{#if useFadeEdge}
-				<radialGradient id="fadeEdge" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-					<stop offset="90%" stop-color="black" />
-					<stop offset="100%" stop-color="white" />
-				</radialGradient>
-			{/if}
-
-			{#if useGlowFilter}
-				<filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-					<feGaussianBlur stdDeviation="2" result="blur" />
-					<feComposite in="SourceGraphic" in2="blur" operator="over" />
-				</filter>
-			{/if}
-
-			{#if useSvgMask}
-				<mask id="fsStormMask">
-					<rect x="0" y="0" width="100%" height="100%" fill="white" />
-
-					<g transform="translate({metrics.x}, {metrics.y}) scale({metrics.s / 100})">
-						<circle
-							cx={game.currentZone.x}
-							cy={game.currentZone.y}
-							r={game.currentZone.r}
-							fill={useFadeEdge ? 'url(#fadeEdge)' : 'black'}
-							class="zone-circle-mask"
-							style={`--zone-transition: ${zoneTransitionMs}ms`}
-						/>
-					</g>
-				</mask>
-			{/if}
-		</defs>
-
-		{#if useSvgMask}
-			<!-- SVG-based storm overlay (HIGH quality) -->
-			<rect
-				x="0"
-				y="0"
-				width="100%"
-				height="100%"
-				fill={theme.primary}
-				mask="url(#fsStormMask)"
-				filter={useSvgFog ? 'url(#storm-fog)' : 'none'}
-				class="opacity-90 transition-colors duration-1000 will-change-[r_cy_cx]"
-			/>
-			<rect
-				x="0"
-				y="0"
-				width="100%"
-				height="100%"
-				fill={theme.secondary}
-				fill-opacity="0.5"
-				mask="url(#fsStormMask)"
-				class="transition-colors duration-1000 will-change-[r_cy_cx]"
-			/>
+				<rect width="100%" height="100%" fill={theme.primary} filter="url(#storm-fog)" />
+			</svg>
 		{:else}
-			<!-- Simplified SVG mask for MEDIUM/LOW quality (no expensive filters) -->
-			<mask id="fsStormMaskSimple">
-				<rect x="0" y="0" width="100%" height="100%" fill="white" />
-				<g transform="translate({metrics.x}, {metrics.y}) scale({metrics.s / 100})">
-					<circle
-						cx={game.currentZone.x}
-						cy={game.currentZone.y}
-						r={game.currentZone.r}
-						fill="black"
-						class="zone-circle-mask"
-						style={`--zone-transition: ${zoneTransitionMs}ms`}
-					/>
-				</g>
-			</mask>
-			<rect
-				x="0"
-				y="0"
-				width="100%"
-				height="100%"
-				fill={theme.primary}
-				mask="url(#fsStormMaskSimple)"
-				class="opacity-40 transition-colors duration-1000"
-			/>
-			<rect
-				x="0"
-				y="0"
-				width="100%"
-				height="100%"
-				fill={theme.secondary}
-				fill-opacity="0.5"
-				mask="url(#fsStormMaskSimple)"
-				class="transition-colors duration-1000"
-			/>
+			<div
+				class="absolute inset-0 opacity-40 transition-colors duration-1000 will-change-transform"
+				style:background-color={theme.primary}
+			></div>
 		{/if}
+		<div
+			class="absolute inset-0 opacity-50 transition-colors duration-1000 will-change-transform"
+			style:background-color={theme.secondary}
+		></div>
+	</div>
 
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+	<svg
+		class="fixed inset-0 z-10 h-full w-full {isDm
+			? 'cursor-crosshair pointer-events-auto'
+			: 'pointer-events-none'}"
+		onclick={handleMapClick}
+		onmousemove={handleMouseMove}
+		onmouseleave={handleMouseLeave}
+		role="application"
+	>
 		<g transform="translate({metrics.x}, {metrics.y}) scale({metrics.s / 100})">
 			{#if isDm && hoverCell}
 				<rect
@@ -348,6 +278,20 @@
 				</g>
 			{/if}
 
+			<!-- Wide faint stroke as glow; a blur filter here re-rasterized the whole overlay every frame -->
+			{#if useGlow}
+				<circle
+					cx={game.currentZone.x}
+					cy={game.currentZone.y}
+					r={game.currentZone.r}
+					fill="none"
+					stroke={theme.accent}
+					stroke-width="2"
+					stroke-opacity="0.25"
+					class="transition-colors duration-1000 zone-circle"
+					style={`--zone-transition: ${zoneTransitionMs}ms`}
+				/>
+			{/if}
 			<circle
 				cx={game.currentZone.x}
 				cy={game.currentZone.y}
@@ -355,7 +299,6 @@
 				fill="none"
 				stroke={theme.accent}
 				stroke-width="0.5"
-				filter={useGlowFilter ? 'url(#glow)' : 'none'}
 				class="transition-colors duration-1000 will-change-auto zone-circle"
 				style={`--zone-transition: ${zoneTransitionMs}ms`}
 			/>
@@ -381,12 +324,38 @@
 </div>
 
 <style>
-	.zone-circle,
-	.zone-circle-mask {
+	@property --zx {
+		syntax: '<length>';
+		inherits: false;
+		initial-value: 0px;
+	}
+	@property --zy {
+		syntax: '<length>';
+		inherits: false;
+		initial-value: 0px;
+	}
+	@property --zr {
+		syntax: '<length>';
+		inherits: false;
+		initial-value: 0px;
+	}
+
+	.storm {
+		mask-image: radial-gradient(
+			circle var(--zr) at var(--zx) var(--zy),
+			transparent var(--edge),
+			black 100%
+		);
+		transition:
+			--zx var(--zone-transition, 200ms) linear,
+			--zy var(--zone-transition, 200ms) linear,
+			--zr var(--zone-transition, 200ms) linear;
+	}
+
+	.zone-circle {
 		transition:
 			cx var(--zone-transition, 200ms) linear,
 			cy var(--zone-transition, 200ms) linear,
 			r var(--zone-transition, 200ms) linear;
-		will-change: cx cy r;
 	}
 </style>
