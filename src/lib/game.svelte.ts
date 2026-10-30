@@ -219,7 +219,7 @@ export class GameEngine {
 				this.engineError =
 					'The game timer has crashed. The clock will not advance. Please reload the page.';
 			};
-			this.#worker.onmessage = () => this.#tick();
+			this.#worker.onmessage = () => this.tick();
 		} catch (e) {
 			console.error('[GameEngine] Failed to create worker:', e);
 			this.engineError = 'Failed to start the game timer. Please reload the page.';
@@ -239,8 +239,8 @@ export class GameEngine {
 		this.#broadcast();
 	}
 
-	#tick() {
-		if (!this.isRunning) return;
+	tick() {
+		if (!this.#isDm || !this.isRunning) return;
 		this.elapsedTime += 100;
 
 		if (this.nextRound) {
