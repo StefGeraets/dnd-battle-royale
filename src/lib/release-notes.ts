@@ -61,6 +61,18 @@ export const ROADMAP: RoadmapItem[] = [
 // Generated from git commit history.
 export const RELEASES: ReleaseNotes[] = [
 	{
+		version: '1.0.6',
+		date: '2026-10-30',
+		summary: 'Smoother storm rendering and presenter fixes',
+		features: [
+			'Storm shrinking uses far less CPU on both screens, on every graphics quality',
+			'Resetting the campaign now also clears the presenter screen',
+			'Presenter screen no longer redraws loot chests every tick',
+			'Upgraded to SvelteKit 3 and Vite 8'
+		],
+		completedUpcoming: []
+	},
+	{
 		version: '1.0.5',
 		date: '2026-03-24',
 		summary: 'Kill feed on DM screen and manual kill trigger',
