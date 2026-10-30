@@ -113,7 +113,7 @@
 		}
 		const { gridX, gridY } = coords;
 		if (gridX >= 0 && gridX < GRID_SIZE && gridY >= 0 && gridY < GRID_SIZE) {
-			hoverCell = { x: gridX, y: gridY };
+			if (hoverCell?.x !== gridX || hoverCell?.y !== gridY) hoverCell = { x: gridX, y: gridY };
 		} else {
 			hoverCell = null;
 		}
