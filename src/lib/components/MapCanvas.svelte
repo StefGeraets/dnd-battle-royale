@@ -1,7 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { GameEngine } from '$lib/game.svelte';
-	import { GRID_SIZE, STORM_THEMES, DEFAULT_SHRINK_DURATION_MS, QUALITY_STEPS_LOW, QUALITY_STEPS_MEDIUM } from '../game.config';
+	import {
+		GRID_SIZE,
+		STORM_THEMES,
+		DEFAULT_SHRINK_DURATION_MS,
+		QUALITY_STEPS_LOW,
+		QUALITY_STEPS_MEDIUM
+	} from '../game.config';
 
 	type Props = {
 		game: GameEngine;
@@ -10,12 +16,7 @@
 		onSelectChest?: (id: string | null) => void;
 	};
 
-	let {
-		game,
-		isDm = false,
-		mode = 'ZONE',
-		onSelectChest = () => {}
-	}: Props = $props();
+	let { game, isDm = false, mode = 'ZONE', onSelectChest = () => {} }: Props = $props();
 
 	// We track the Image's position on screen to align the SVG
 	let mapImageEl: HTMLImageElement;
@@ -23,7 +24,7 @@
 	let theme = $derived(STORM_THEMES[game.stormThemeId] || STORM_THEMES['fire']);
 	let stormRgb = $derived(hexToRgb(theme.primary));
 	let hoverCell = $state<{ x: number; y: number } | null>(null);
-	
+
 	// Quality-based optimizations
 	let useSvgFog = $derived(game.graphicsQuality === 'HIGH');
 	let useSvgMask = $derived(game.graphicsQuality === 'HIGH');
@@ -31,7 +32,11 @@
 	let useFadeEdge = $derived(game.graphicsQuality === 'HIGH');
 	let zoneTransitionMs = $derived.by(() => {
 		if (game.graphicsQuality === 'HIGH') return 150; // frequent updates, short smoothing
-		if (game.graphicsQuality === 'MEDIUM') return Math.max(120, (game.shrinkDuration || DEFAULT_SHRINK_DURATION_MS) / QUALITY_STEPS_MEDIUM);
+		if (game.graphicsQuality === 'MEDIUM')
+			return Math.max(
+				120,
+				(game.shrinkDuration || DEFAULT_SHRINK_DURATION_MS) / QUALITY_STEPS_MEDIUM
+			);
 		return Math.max(150, (game.shrinkDuration || DEFAULT_SHRINK_DURATION_MS) / QUALITY_STEPS_LOW); // LOW, fewer updates, longer smoothing
 	});
 
@@ -56,13 +61,20 @@
 	// Constants
 	const CELL_SIZE = 100 / GRID_SIZE;
 
-	function getGridCoords(e: MouseEvent): { gridX: number; gridY: number; scaleX: number; scaleY: number } | null {
+	function getGridCoords(
+		e: MouseEvent
+	): { gridX: number; gridY: number; scaleX: number; scaleY: number } | null {
 		const relX = e.clientX - metrics.x;
 		const relY = e.clientY - metrics.y;
 		const scaleX = (relX / metrics.s) * 100;
 		const scaleY = (relY / metrics.s) * 100;
 		if (scaleX < 0 || scaleX > 100 || scaleY < 0 || scaleY > 100) return null;
-		return { gridX: Math.floor(scaleX / CELL_SIZE), gridY: Math.floor(scaleY / CELL_SIZE), scaleX, scaleY };
+		return {
+			gridX: Math.floor(scaleX / CELL_SIZE),
+			gridY: Math.floor(scaleY / CELL_SIZE),
+			scaleX,
+			scaleY
+		};
 	}
 
 	function handleMapClick(e: MouseEvent) {
@@ -279,7 +291,7 @@
 			</g>
 
 			<!-- special areas -->
-			{#each game.specialAreas as area (area)}
+			{#each game.specialAreas as area (area.id)}
 				<g
 					transform="translate({area.x * CELL_SIZE}, {area.y * CELL_SIZE})"
 					class="outline-0 cursor-pointer"
@@ -371,7 +383,9 @@
 <style>
 	.zone-circle,
 	.zone-circle-mask {
-		transition: cx var(--zone-transition, 200ms) linear, cy var(--zone-transition, 200ms) linear,
+		transition:
+			cx var(--zone-transition, 200ms) linear,
+			cy var(--zone-transition, 200ms) linear,
 			r var(--zone-transition, 200ms) linear;
 		will-change: cx cy r;
 	}
