@@ -54,13 +54,15 @@
 	{/each}
 
 	<div
-		class="absolute bottom-0 top-0 z-10 w-0.5 bg-yellow-400 shadow-[0_0_10px_orange] transition-all duration-100 ease-linear"
-		style="left: {nowPct}%"
+		class="pointer-events-none absolute inset-0 z-10 transition-transform duration-100 ease-linear"
+		style="transform: translateX({nowPct}%)"
 	>
-		<div
-			class="absolute top-0 -translate-x-1/2 rounded-b bg-yellow-500 px-1.5 py-0.5 text-[10px] font-bold text-black"
-		>
-			NOW
+		<div class="absolute bottom-0 left-0 top-0 w-0.5 bg-yellow-400 shadow-[0_0_10px_orange]">
+			<div
+				class="absolute top-0 -translate-x-1/2 rounded-b bg-yellow-500 px-1.5 py-0.5 text-[10px] font-bold text-black"
+			>
+				NOW
+			</div>
 		</div>
 	</div>
 </div>

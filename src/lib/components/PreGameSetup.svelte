@@ -68,10 +68,10 @@
 			onclick={() => game.togglePresenterCurtain()}
 		>
 			{#if game.isPresenterHidden}
-			<Icon name="eye" size="16" /> REVEAL MAP
-		{:else}
-			<Icon name="eye-off" size="16" /> HIDE MAP
-		{/if}
+				<Icon name="eye" size="16" /> REVEAL MAP
+			{:else}
+				<Icon name="eye-off" size="16" /> HIDE MAP
+			{/if}
 		</button>
 	</div>
 

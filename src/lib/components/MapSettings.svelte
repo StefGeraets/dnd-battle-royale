@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { GameEngine } from '$lib/game.svelte';
+	import type { GameEngine } from '#lib/game.svelte.js';
 	import { MAP_PRESETS, STORM_THEMES } from '../game.config';
 	import Icon from './Icon.svelte';
 
@@ -9,7 +9,7 @@
 
 	let { game }: Props = $props();
 
-	const ENABLE_CUSTOM_UPLOAD = false;
+	// const ENABLE_CUSTOM_UPLOAD = false;
 
 	let isLocked = $derived(game.elapsedTime > 0);
 
@@ -38,14 +38,16 @@
 	<h2 class="flex justify-between text-xs font-bold uppercase tracking-wider text-gray-400">
 		<span>Map & Atmosphere</span>
 		{#if isLocked}
-			<span class="text-red-500 flex items-center gap-1"><Icon name="lock" size="0.9em" /> Locked</span>
+			<span class="text-red-500 flex items-center gap-1"
+				><Icon name="lock" size="0.9em" /> Locked</span
+			>
 		{/if}
 	</h2>
 
 	<div class={isLocked ? 'opacity-50 pointer-events-none grayscale' : ''}>
 		<label for="stormType" class="mb-2 block text-xs text-zinc-500">Storm Type</label>
 		<div class="grid grid-cols-3 gap-2">
-			{#each Object.values(STORM_THEMES) as theme}
+			{#each Object.values(STORM_THEMES) as theme (theme)}
 				<button
 					disabled={isLocked}
 					class="rounded border px-2 py-1 text-xs font-bold transition-all cursor-pointer text-white {game.stormThemeId ===
@@ -64,7 +66,7 @@
 	<div class={isLocked ? 'opacity-50 pointer-events-none grayscale' : ''}>
 		<label for="mapPreset" class="mb-2 block text-xs text-zinc-500">Select Map</label>
 		<div class="grid grid-cols-1 gap-2">
-			{#each MAP_PRESETS as preset}
+			{#each MAP_PRESETS as preset (preset)}
 				<button
 					disabled={isLocked}
 					class="flex items-center gap-3 rounded bg-zinc-800 p-2 border border-zinc-700 hover:bg-zinc-700 text-left transition-colors cursor-pointer

@@ -25,7 +25,7 @@
 					<span>Battle Royale Manager v{APP_VERSION}</span>
 					<span class="text-slate-600">•</span>
 					<a
-						href={asset('/WUBG-Homebrewery.pdf')}
+						href={asset('WUBG-Homebrewery.pdf')}
 						target="_blank"
 						class="flex items-center gap-1 text-blue-400 hover:text-blue-300 hover:underline"
 					>
@@ -49,10 +49,17 @@
 				</h2>
 				<div class="ml-8 space-y-2 text-sm bg-zinc-800/50 p-4 rounded border border-zinc-800">
 					<ul class="list-disc list-outside ml-4 space-y-1">
-						<li>Connect your <strong>Second Monitor</strong> or TV (The "Presenter Screen").</li>
 						<li>
-							Open <a href={resolve('/presenter')} target="_blank"
-								><code
+							Connect your
+							<strong>Second Monitor</strong>
+							or TV (The "Presenter Screen").
+						</li>
+
+						<li>
+							Open
+
+							<a href={resolve('presenter')} target="_blank">
+								<code
 									class="bg-zinc-700 px-1 rounded text-blue-400 hover:text-blue-100 underline hover:decoration-blue-500 decoration-2 underline-offset-2"
 									>/presenter</code
 								></a
@@ -89,7 +96,9 @@
 							on this.
 						</li>
 						<li class="bg-zinc-800 p-2 rounded border border-zinc-700">
-							<strong class="text-white flex items-center gap-1"><Icon name="palette" size="14" /> Map & Atmosphere</strong>
+							<strong class="text-white flex items-center gap-1"
+								><Icon name="palette" size="14" /> Map & Atmosphere</strong
+							>
 							Select a <strong>Map Preset</strong> (Forest, Ruins, etc.) and a
 							<strong>Storm Theme</strong> (Fire, Ice, Toxic) to match your campaign.
 						</li>
@@ -147,20 +156,35 @@
 				<div class="ml-8 text-sm bg-zinc-800/50 p-4 rounded border border-zinc-800">
 					<ol class="list-decimal list-inside space-y-2">
 						<li>
-							Click <strong class="text-green-400 inline-flex items-center gap-1"><Icon name="eye" size="13" /> REVEAL MAP</strong> when players are seated.
+							Click <strong class="text-green-400 inline-flex items-center gap-1"
+								><Icon name="eye" size="13" /> REVEAL MAP</strong
+							> when players are seated.
 						</li>
-						<li>Click <strong class="text-green-400">START GAME</strong> to begin the timer.</li>
+
 						<li>
-							<strong>Before</strong> the warning countdown appears, use
-							<strong class="text-blue-400 inline-flex items-center gap-1"><Icon name="crosshair" size="13" /> Zone Mode</strong> to click the map and set the next safe
-							center.
+							Click
+							<strong class="text-green-400">START GAME</strong>
+							to begin the timer.
 						</li>
+
+						<li>
+							<strong>Before</strong>
+							the warning countdown appears, use
+
+							<strong class="text-blue-400 inline-flex items-center gap-1"
+								><Icon name="crosshair" size="13" />Zone Mode</strong
+							>
+
+							to click the map and set the next safe center.
+						</li>
+
 						<ul>
 							<li class="pl-4 text-zinc-400 italic">
 								Note: Once the countdown starts, the new ring location is revealed to players on the
 								main screen!
 							</li>
 						</ul>
+
 						<li>
 							If you don't click, the zone will simply shrink concentrically towards the current
 							center.

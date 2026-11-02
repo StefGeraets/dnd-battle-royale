@@ -1,7 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { GameEngine } from '$lib/game.svelte';
-	import { GRID_SIZE, STORM_THEMES, DEFAULT_SHRINK_DURATION_MS, QUALITY_STEPS_LOW, QUALITY_STEPS_MEDIUM } from '../game.config';
+	import { GameEngine } from '#lib/game.svelte.js';
+	import {
+		GRID_SIZE,
+		STORM_THEMES,
+		DEFAULT_SHRINK_DURATION_MS,
+		QUALITY_STEPS_LOW,
+		QUALITY_STEPS_MEDIUM
+	} from '../game.config';
 
 	type Props = {
 		game: GameEngine;
@@ -10,12 +16,7 @@
 		onSelectChest?: (id: string | null) => void;
 	};
 
-	let {
-		game,
-		isDm = false,
-		mode = 'ZONE',
-		onSelectChest = () => {}
-	}: Props = $props();
+	let { game, isDm = false, mode = 'ZONE', onSelectChest = () => {} }: Props = $props();
 
 	// We track the Image's position on screen to align the SVG
 	let mapImageEl: HTMLImageElement;
@@ -23,17 +24,28 @@
 	let theme = $derived(STORM_THEMES[game.stormThemeId] || STORM_THEMES['fire']);
 	let stormRgb = $derived(hexToRgb(theme.primary));
 	let hoverCell = $state<{ x: number; y: number } | null>(null);
-	
+
 	// Quality-based optimizations
 	let useSvgFog = $derived(game.graphicsQuality === 'HIGH');
-	let useSvgMask = $derived(game.graphicsQuality === 'HIGH');
-	let useGlowFilter = $derived(game.graphicsQuality !== 'LOW');
+	let useGlow = $derived(game.graphicsQuality !== 'LOW');
 	let useFadeEdge = $derived(game.graphicsQuality === 'HIGH');
 	let zoneTransitionMs = $derived.by(() => {
 		if (game.graphicsQuality === 'HIGH') return 150; // frequent updates, short smoothing
-		if (game.graphicsQuality === 'MEDIUM') return Math.max(120, (game.shrinkDuration || DEFAULT_SHRINK_DURATION_MS) / QUALITY_STEPS_MEDIUM);
+		if (game.graphicsQuality === 'MEDIUM')
+			return Math.max(
+				120,
+				(game.shrinkDuration || DEFAULT_SHRINK_DURATION_MS) / QUALITY_STEPS_MEDIUM
+			);
 		return Math.max(150, (game.shrinkDuration || DEFAULT_SHRINK_DURATION_MS) / QUALITY_STEPS_LOW); // LOW, fewer updates, longer smoothing
 	});
+
+	// Shared by the storm mask and the ring glow. Only the zone (map units) transitions;
+	// the map's screen position/size snaps, so resizes and map loads don't animate the hole.
+	let zoneVars = $derived(
+		`--zx: ${game.currentZone.x}; --zy: ${game.currentZone.y}; --zr: ${game.currentZone.r};` +
+			`--mx: ${metrics.x}px; --my: ${metrics.y}px; --ms: ${metrics.s}px;` +
+			`--zone-transition: ${zoneTransitionMs}ms`
+	);
 
 	function updateMetrics() {
 		if (mapImageEl) {
@@ -56,13 +68,20 @@
 	// Constants
 	const CELL_SIZE = 100 / GRID_SIZE;
 
-	function getGridCoords(e: MouseEvent): { gridX: number; gridY: number; scaleX: number; scaleY: number } | null {
+	function getGridCoords(
+		e: MouseEvent
+	): { gridX: number; gridY: number; scaleX: number; scaleY: number } | null {
 		const relX = e.clientX - metrics.x;
 		const relY = e.clientY - metrics.y;
 		const scaleX = (relX / metrics.s) * 100;
 		const scaleY = (relY / metrics.s) * 100;
 		if (scaleX < 0 || scaleX > 100 || scaleY < 0 || scaleY > 100) return null;
-		return { gridX: Math.floor(scaleX / CELL_SIZE), gridY: Math.floor(scaleY / CELL_SIZE), scaleX, scaleY };
+		return {
+			gridX: Math.floor(scaleX / CELL_SIZE),
+			gridY: Math.floor(scaleY / CELL_SIZE),
+			scaleX,
+			scaleY
+		};
 	}
 
 	function handleMapClick(e: MouseEvent) {
@@ -102,7 +121,7 @@
 		}
 		const { gridX, gridY } = coords;
 		if (gridX >= 0 && gridX < GRID_SIZE && gridY >= 0 && gridY < GRID_SIZE) {
-			hoverCell = { x: gridX, y: gridY };
+			if (hoverCell?.x !== gridX || hoverCell?.y !== gridY) hoverCell = { x: gridX, y: gridY };
 		} else {
 			hoverCell = null;
 		}
@@ -136,19 +155,14 @@
 		onload={updateMetrics}
 	/>
 
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-	<svg
-		class="fixed inset-0 z-10 h-full w-full {isDm
-			? 'cursor-crosshair pointer-events-auto'
-			: 'pointer-events-none'}"
-		onclick={handleMapClick}
-		onmousemove={handleMouseMove}
-		onmouseleave={handleMouseLeave}
-		role="application"
+	<!-- Storm layers are composited once (will-change); only the CSS mask moves during a shrink -->
+	<div
+		class="storm pointer-events-none fixed inset-0 z-10"
+		style={zoneVars}
+		style:--edge={useFadeEdge ? '90%' : '100%'}
 	>
-		<defs>
-			{#if useSvgFog}
+		{#if useSvgFog}
+			<svg class="absolute inset-0 h-full w-full opacity-90 will-change-transform">
 				<filter id="storm-fog" x="0%" y="0%" width="100%" height="100%">
 					<feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" result="noise" />
 					<feColorMatrix
@@ -162,98 +176,41 @@
 					/>
 					<feComposite operator="in" in="coloredNoise" in2="SourceGraphic" result="composite" />
 				</filter>
-			{/if}
-
-			{#if useFadeEdge}
-				<radialGradient id="fadeEdge" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-					<stop offset="90%" stop-color="black" />
-					<stop offset="100%" stop-color="white" />
-				</radialGradient>
-			{/if}
-
-			{#if useGlowFilter}
-				<filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-					<feGaussianBlur stdDeviation="2" result="blur" />
-					<feComposite in="SourceGraphic" in2="blur" operator="over" />
-				</filter>
-			{/if}
-
-			{#if useSvgMask}
-				<mask id="fsStormMask">
-					<rect x="0" y="0" width="100%" height="100%" fill="white" />
-
-					<g transform="translate({metrics.x}, {metrics.y}) scale({metrics.s / 100})">
-						<circle
-							cx={game.currentZone.x}
-							cy={game.currentZone.y}
-							r={game.currentZone.r}
-							fill={useFadeEdge ? 'url(#fadeEdge)' : 'black'}
-							class="zone-circle-mask"
-							style={`--zone-transition: ${zoneTransitionMs}ms`}
-						/>
-					</g>
-				</mask>
-			{/if}
-		</defs>
-
-		{#if useSvgMask}
-			<!-- SVG-based storm overlay (HIGH quality) -->
-			<rect
-				x="0"
-				y="0"
-				width="100%"
-				height="100%"
-				fill={theme.primary}
-				mask="url(#fsStormMask)"
-				filter={useSvgFog ? 'url(#storm-fog)' : 'none'}
-				class="opacity-90 transition-colors duration-1000 will-change-[r_cy_cx]"
-			/>
-			<rect
-				x="0"
-				y="0"
-				width="100%"
-				height="100%"
-				fill={theme.secondary}
-				fill-opacity="0.5"
-				mask="url(#fsStormMask)"
-				class="transition-colors duration-1000 will-change-[r_cy_cx]"
-			/>
+				<rect width="100%" height="100%" fill={theme.primary} filter="url(#storm-fog)" />
+			</svg>
 		{:else}
-			<!-- Simplified SVG mask for MEDIUM/LOW quality (no expensive filters) -->
-			<mask id="fsStormMaskSimple">
-				<rect x="0" y="0" width="100%" height="100%" fill="white" />
-				<g transform="translate({metrics.x}, {metrics.y}) scale({metrics.s / 100})">
-					<circle
-						cx={game.currentZone.x}
-						cy={game.currentZone.y}
-						r={game.currentZone.r}
-						fill="black"
-						class="zone-circle-mask"
-						style={`--zone-transition: ${zoneTransitionMs}ms`}
-					/>
-				</g>
-			</mask>
-			<rect
-				x="0"
-				y="0"
-				width="100%"
-				height="100%"
-				fill={theme.primary}
-				mask="url(#fsStormMaskSimple)"
-				class="opacity-40 transition-colors duration-1000"
-			/>
-			<rect
-				x="0"
-				y="0"
-				width="100%"
-				height="100%"
-				fill={theme.secondary}
-				fill-opacity="0.5"
-				mask="url(#fsStormMaskSimple)"
-				class="transition-colors duration-1000"
-			/>
+			<div
+				class="absolute inset-0 opacity-40 transition-colors duration-1000 will-change-transform"
+				style:background-color={theme.primary}
+			></div>
 		{/if}
+		<div
+			class="absolute inset-0 opacity-50 transition-colors duration-1000 will-change-transform"
+			style:background-color={theme.secondary}
+		></div>
+	</div>
 
+	<!-- Ring glow as a gradient; a blur filter on the ring re-rasterized the whole overlay every frame -->
+	{#if useGlow && game.currentZone.r > 0}
+		<div
+			class="ring-glow pointer-events-none fixed inset-0 z-10 will-change-transform"
+			style={zoneVars}
+			style:--glow="{(4 * metrics.s) / 100}px"
+			style:--accent={theme.accent}
+		></div>
+	{/if}
+
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+	<svg
+		class="fixed inset-0 z-10 h-full w-full {isDm
+			? 'cursor-crosshair pointer-events-auto'
+			: 'pointer-events-none'}"
+		onclick={handleMapClick}
+		onmousemove={handleMouseMove}
+		onmouseleave={handleMouseLeave}
+		role="application"
+	>
 		<g transform="translate({metrics.x}, {metrics.y}) scale({metrics.s / 100})">
 			{#if isDm && hoverCell}
 				<rect
@@ -279,7 +236,7 @@
 			</g>
 
 			<!-- special areas -->
-			{#each game.specialAreas as area (area)}
+			{#each game.specialAreas as area (area.id)}
 				<g
 					transform="translate({area.x * CELL_SIZE}, {area.y * CELL_SIZE})"
 					class="outline-0 cursor-pointer"
@@ -343,7 +300,6 @@
 				fill="none"
 				stroke={theme.accent}
 				stroke-width="0.5"
-				filter={useGlowFilter ? 'url(#glow)' : 'none'}
 				class="transition-colors duration-1000 will-change-auto zone-circle"
 				style={`--zone-transition: ${zoneTransitionMs}ms`}
 			/>
@@ -369,10 +325,56 @@
 </div>
 
 <style>
-	.zone-circle,
-	.zone-circle-mask {
-		transition: cx var(--zone-transition, 200ms) linear, cy var(--zone-transition, 200ms) linear,
+	@property --zx {
+		syntax: '<number>';
+		inherits: false;
+		initial-value: 0;
+	}
+	@property --zy {
+		syntax: '<number>';
+		inherits: false;
+		initial-value: 0;
+	}
+	@property --zr {
+		syntax: '<number>';
+		inherits: false;
+		initial-value: 0;
+	}
+
+	.ring-glow {
+		background: radial-gradient(
+			circle var(--cr) at var(--cx) var(--cy),
+			transparent max(0px, calc(var(--cr) - var(--glow))),
+			color-mix(in srgb, var(--accent) 12%, transparent) calc(var(--cr) - var(--glow) / 2),
+			color-mix(in srgb, var(--accent) 40%, transparent) var(--cr),
+			color-mix(in srgb, var(--accent) 12%, transparent) calc(var(--cr) + var(--glow) / 2),
+			transparent calc(var(--cr) + var(--glow))
+		);
+	}
+
+	.storm {
+		mask-image: radial-gradient(
+			circle var(--cr) at var(--cx) var(--cy),
+			transparent var(--edge),
+			black 100%
+		);
+	}
+
+	.storm,
+	.ring-glow {
+		--cx: calc(var(--mx) + var(--zx) * var(--ms) / 100);
+		--cy: calc(var(--my) + var(--zy) * var(--ms) / 100);
+		--cr: calc(var(--zr) * var(--ms) / 100);
+		transition:
+			--zx var(--zone-transition, 200ms) linear,
+			--zy var(--zone-transition, 200ms) linear,
+			--zr var(--zone-transition, 200ms) linear;
+	}
+
+	.zone-circle {
+		transition:
+			cx var(--zone-transition, 200ms) linear,
+			cy var(--zone-transition, 200ms) linear,
 			r var(--zone-transition, 200ms) linear;
-		will-change: cx cy r;
 	}
 </style>
