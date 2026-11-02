@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { fade, scale } from 'svelte/transition';
+	import { prefersReducedMotion } from 'svelte/motion';
 	import { asset, resolve } from '$app/paths';
 	import { APP_VERSION } from '../app-metadata';
 	import Icon from './Icon.svelte';
@@ -15,7 +16,7 @@
 	class="fixed inset-0 z-100 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
 >
 	<div
-		transition:scale={{ start: 0.95, duration: 200 }}
+		transition:scale={{ start: prefersReducedMotion.current ? 1 : 0.95, duration: 200 }}
 		class="w-full max-w-3xl rounded-lg border border-zinc-800 bg-zinc-900 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
 	>
 		<div class="bg-zinc-950 p-6 flex justify-between items-center">

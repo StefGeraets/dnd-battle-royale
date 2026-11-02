@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
+	import { flip } from 'svelte/animate';
+	import { quintOut } from 'svelte/easing';
+	import { prefersReducedMotion } from 'svelte/motion';
 	import type { GameEngine } from '#lib/game.svelte.js';
 	import { formatMs } from '#lib/utils/time.js';
 
@@ -13,8 +16,9 @@
 <div class="flex flex-col gap-2">
 	{#each game.killFeed as kill, i (kill.id)}
 		<div
-			transition:fly|local={{ x: 50, duration: 300 }}
-			class="overflow-hidden rounded-lg border border-white/5 bg-black/75 px-3 py-2 shadow-lg"
+			animate:flip={{ duration: prefersReducedMotion.current ? 0 : 300, easing: quintOut }}
+			in:fly={{ x: prefersReducedMotion.current ? 0 : 50, duration: 300 }}
+			class="overflow-hidden rounded-lg border border-white/5 bg-black/75 px-3 py-2 shadow-lg transition-opacity duration-300"
 			style="opacity: {FADE_OPACITIES[i] ?? 0.25}"
 		>
 			<div class="flex flex-wrap items-baseline justify-end gap-x-1 text-sm text-zinc-200">

@@ -53,7 +53,7 @@
 			<Icon name="gift" size="16" /> Place Loot Chests
 		</button>
 		{#if mode === 'CHEST'}
-			<p class="text-[10px] text-yellow-500/80 mt-1 text-center animate-pulse">
+			<p class="text-[10px] text-yellow-500/80 mt-1 text-center">
 				Click empty grid cells to add chests.
 			</p>
 		{/if}
@@ -62,7 +62,7 @@
 	<div class="pt-2 border-t border-zinc-700/50">
 		<p class="mb-1 text-xs text-zinc-400">Presenter Screen</p>
 		<button
-			class="w-full py-2 px-3 rounded text-sm font-bold transition-colors {game.isPresenterHidden
+			class="w-full py-2 px-3 rounded text-sm font-bold transition duration-150 ease-out active:scale-[0.97] {game.isPresenterHidden
 				? 'bg-red-600 hover:bg-red-500'
 				: 'bg-green-600 hover:bg-green-500'}"
 			onclick={() => game.togglePresenterCurtain()}

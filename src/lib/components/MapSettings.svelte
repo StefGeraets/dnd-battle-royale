@@ -50,7 +50,7 @@
 			{#each Object.values(STORM_THEMES) as theme (theme)}
 				<button
 					disabled={isLocked}
-					class="rounded border px-2 py-1 text-xs font-bold transition-all cursor-pointer text-white {game.stormThemeId ===
+					class="rounded border px-2 py-1 text-xs font-bold transition cursor-pointer text-white {game.stormThemeId ===
 					theme.id
 						? 'scale-105 shadow-md'
 						: 'opacity-60 hover:opacity-100'}"
@@ -87,7 +87,7 @@
 		<label for="graphicsQuality" class="mb-2 block text-xs text-zinc-500">Graphics Quality</label>
 		<div class="grid grid-cols-3 gap-2">
 			<button
-				class="rounded border px-2 py-1 text-xs font-bold transition-all cursor-pointer {game.graphicsQuality ===
+				class="rounded border px-2 py-1 text-xs font-bold transition cursor-pointer {game.graphicsQuality ===
 				'HIGH'
 					? 'bg-green-600 text-white border-green-500 scale-105 shadow-md'
 					: 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:bg-zinc-700'}"
@@ -96,7 +96,7 @@
 				HIGH
 			</button>
 			<button
-				class="rounded border px-2 py-1 text-xs font-bold transition-all cursor-pointer {game.graphicsQuality ===
+				class="rounded border px-2 py-1 text-xs font-bold transition cursor-pointer {game.graphicsQuality ===
 				'MEDIUM'
 					? 'bg-yellow-600 text-white border-yellow-500 scale-105 shadow-md'
 					: 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:bg-zinc-700'}"
@@ -105,7 +105,7 @@
 				MEDIUM
 			</button>
 			<button
-				class="rounded border px-2 py-1 text-xs font-bold transition-all cursor-pointer {game.graphicsQuality ===
+				class="rounded border px-2 py-1 text-xs font-bold transition cursor-pointer {game.graphicsQuality ===
 				'LOW'
 					? 'bg-red-600 text-white border-red-500 scale-105 shadow-md'
 					: 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:bg-zinc-700'}"

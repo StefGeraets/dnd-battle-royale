@@ -61,6 +61,23 @@ export const ROADMAP: RoadmapItem[] = [
 // Generated from git commit history.
 export const RELEASES: ReleaseNotes[] = [
 	{
+		version: '1.0.7',
+		date: '2026-11-02',
+		summary: 'Snappier, calmer animations',
+		features: [
+			'Switching Zone/Chest mode and entering the storm no longer play slide-in animations',
+			'Grid hover highlight follows the mouse without lag',
+			'Theme and map preset colour changes apply in 0.3s instead of 1s',
+			'Countdown overlay, kill feed and donation popup exit faster',
+			'Mission clock progress bars move smoothly with less rendering work',
+			'Animations respect the "reduce motion" system setting',
+			'Next safe zone ring fades in on the presenter and eases from yellow to red when the shrink starts',
+			'Kill feed entries slide down smoothly when a new kill arrives',
+			'Main DM buttons give subtle press feedback'
+		],
+		completedUpcoming: []
+	},
+	{
 		version: '1.0.6',
 		date: '2026-10-30',
 		summary: 'Smoother storm rendering and presenter fixes',

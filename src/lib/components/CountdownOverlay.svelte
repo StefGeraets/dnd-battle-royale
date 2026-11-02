@@ -1,5 +1,7 @@
 <script lang="ts">
-	import { fly } from 'svelte/transition';
+	import { fade, fly } from 'svelte/transition';
+	import { prefersReducedMotion } from 'svelte/motion';
+	import { quintOut } from 'svelte/easing';
 	import type { GameEngine } from '../game.svelte';
 	import { formatSeconds } from '../utils/time';
 
@@ -12,7 +14,10 @@
 
 <div class="pointer-events-none fixed inset-x-0 top-10 z-60 flex justify-center">
 	{#if game.phase === 'WARNING'}
-		<div transition:fly={{ y: -50, duration: 500 }}>
+		<div
+			in:fly={{ y: prefersReducedMotion.current ? 0 : -50, duration: 500, easing: quintOut }}
+			out:fade={{ duration: 150 }}
+		>
 			<div
 				class="flex flex-col items-center gap-1 rounded-lg border-2 border-red-600 bg-red-950/60 px-8 py-4 text-white shadow-[0_0_50px_rgba(220,38,38,0.6)] backdrop-blur-xs"
 			>

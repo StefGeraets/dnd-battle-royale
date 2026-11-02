@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
+	import { prefersReducedMotion } from 'svelte/motion';
 	import { DONATION_URL } from '../game.config';
 	import Icon from './Icon.svelte';
 	let { onClose } = $props();
 </script>
 
 <div
-	transition:fly={{ y: 20, duration: 500 }}
+	in:fly={{ y: prefersReducedMotion.current ? 0 : 20, duration: 500 }}
+	out:fly={{ y: prefersReducedMotion.current ? 0 : 20, duration: 200 }}
 	class="fixed bottom-6 right-6 z-100 flex max-w-md items-start gap-4 rounded-xl border border-yellow-500/30 bg-zinc-900/95 p-4 shadow-2xl shadow-black/50 backdrop-blur-md"
 >
 	<div

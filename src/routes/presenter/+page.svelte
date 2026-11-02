@@ -35,7 +35,7 @@
 </script>
 
 <div
-	class="h-screen w-screen flex items-center justify-center overflow-hidden transition-colors duration-1000"
+	class="h-screen w-screen flex items-center justify-center overflow-hidden transition-colors duration-300"
 	style="background-color: {game.themeColor}"
 >
 	<MapCanvas {game} isDm={false} />
