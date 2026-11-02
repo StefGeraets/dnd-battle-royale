@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { GameEngine, SpecialArea } from '../game.svelte';
-	import { fly, slide } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
+	import { prefersReducedMotion } from 'svelte/motion';
 	import Icon from './Icon.svelte';
 
 	type Props = {
@@ -19,7 +20,8 @@
 
 	<div class="flex gap-2">
 		<button
-			class="flex-1 py-2 text-sm font-bold rounded transition-colors {mode === 'ZONE'
+			class="flex-1 py-2 text-sm font-bold rounded transition duration-150 ease-out active:scale-[0.97] {mode ===
+			'ZONE'
 				? 'bg-blue-600 text-white'
 				: 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'}"
 			onclick={() => onModeChange('ZONE')}
@@ -27,7 +29,8 @@
 			<Icon name="crosshair" size="16" /> Move Zone
 		</button>
 		<button
-			class="flex-1 py-2 text-sm font-bold rounded transition-colors {mode === 'CHEST'
+			class="flex-1 py-2 text-sm font-bold rounded transition duration-150 ease-out active:scale-[0.97] {mode ===
+			'CHEST'
 				? 'bg-yellow-600 text-white'
 				: 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'}"
 			onclick={() => onModeChange('CHEST')}
@@ -39,7 +42,7 @@
 	<div class="mt-3 min-h-15">
 		{#if selectedChest && mode === 'CHEST'}
 			<div
-				transition:fly={{ y: -10, duration: 200 }}
+				transition:fly={{ y: prefersReducedMotion.current ? 0 : -10, duration: 200 }}
 				class="rounded border border-yellow-600/30 bg-yellow-900/20 p-3"
 			>
 				<div class="flex justify-between items-center mb-2">
@@ -67,20 +70,12 @@
 				</button>
 			</div>
 		{:else if mode === 'CHEST'}
-			<p
-				class="text-center text-xs text-yellow-500/80"
-				in:slide={{ axis: 'y' }}
-				out:slide={{ axis: 'y' }}
-			>
+			<p class="text-center text-xs text-yellow-500/80">
 				Click empty grid to add 2x2 chest. <br />
 				Click existing chest to edit.
 			</p>
 		{:else}
-			<p
-				class="text-center text-xs text-blue-400/80"
-				in:slide={{ axis: 'y' }}
-				out:slide={{ axis: 'y' }}
-			>
+			<p class="text-center text-xs text-blue-400/80">
 				Click map to set the next Safe Zone center.<br />(Only active before shrink starts)
 			</p>
 		{/if}

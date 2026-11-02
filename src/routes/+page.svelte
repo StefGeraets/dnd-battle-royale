@@ -12,7 +12,8 @@
 	import CombatantCounter from '#lib/components/CombatantCounter.svelte';
 	import KillFeed from '#lib/components/KillFeed.svelte';
 	import Icon from '#lib/components/Icon.svelte';
-	import { fly, slide } from 'svelte/transition';
+	import { slide } from 'svelte/transition';
+	import { quintOut } from 'svelte/easing';
 	import { onMount } from 'svelte';
 	import { asset } from '$app/paths';
 	import { STORAGE_KEYS } from '#lib/game.config.js';
@@ -120,7 +121,7 @@
 />
 
 <div
-	class="flex flex-col h-screen bg-zinc-950 text-white transition-colors duration-1000"
+	class="flex flex-col h-screen bg-zinc-950 text-white transition-colors duration-300"
 	style="background-color: {game.themeColor}"
 >
 	{#if showOnboarding}
@@ -177,7 +178,7 @@
 			</div>
 
 			{#if showSetup}
-				<div transition:slide>
+				<div transition:slide={{ duration: 250, easing: quintOut }}>
 					<PreGameSetup
 						{game}
 						{mode}
@@ -190,12 +191,9 @@
 			{/if}
 
 			{#if game.distanceOutside > 0}
-				<div
-					transition:fly={{ y: -20 }}
-					class="animate-pulse rounded border-2 border-red-600 bg-red-800 p-3 text-center shadow-xl"
-				>
+				<div class="rounded border-2 border-red-600 bg-red-800 p-3 text-center shadow-xl">
 					<div
-						class="text-xs font-bold uppercase text-red-200 flex items-center justify-center gap-1"
+						class="animate-pulse text-xs font-bold uppercase text-red-200 flex items-center justify-center gap-1"
 					>
 						<Icon name="alert-triangle" size="14" />
 						Party in Storm
@@ -229,7 +227,7 @@
 				<CombatantCounter {game} />
 
 				<button
-					class="mt-3 w-full rounded py-2 text-sm font-bold transition-colors bg-zinc-800 text-zinc-300 hover:bg-red-900 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
+					class="mt-3 w-full rounded py-2 text-sm font-bold transition duration-150 ease-out active:scale-[0.97] bg-zinc-800 text-zinc-300 hover:bg-red-900 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
 					disabled={game.remainingCombatants <= 2}
 					onclick={() => game.triggerManualKill()}
 				>

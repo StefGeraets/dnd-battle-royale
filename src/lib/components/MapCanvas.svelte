@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { fade } from 'svelte/transition';
+	import { cubicOut } from 'svelte/easing';
 	import { GameEngine } from '#lib/game.svelte.js';
 	import {
 		GRID_SIZE,
@@ -151,7 +153,7 @@
 		bind:this={mapImageEl}
 		src={game.mapImage}
 		alt="Battle Map"
-		class="max-h-screen max-w-full shadow-2xl transition-opacity duration-500 aspect-square object-cover"
+		class="max-h-screen max-w-full shadow-2xl aspect-square object-cover"
 		onload={updateMetrics}
 	/>
 
@@ -180,12 +182,12 @@
 			</svg>
 		{:else}
 			<div
-				class="absolute inset-0 opacity-40 transition-colors duration-1000 will-change-transform"
+				class="absolute inset-0 opacity-40 transition-colors duration-300 will-change-transform"
 				style:background-color={theme.primary}
 			></div>
 		{/if}
 		<div
-			class="absolute inset-0 opacity-50 transition-colors duration-1000 will-change-transform"
+			class="absolute inset-0 opacity-50 transition-colors duration-300 will-change-transform"
 			style:background-color={theme.secondary}
 		></div>
 	</div>
@@ -223,7 +225,7 @@
 					stroke={mode === 'CHEST' ? '#facc15' : '#3b82f6'}
 					stroke-width="0.2"
 					stroke-opacity="0.5"
-					class="pointer-events-none transition-all duration-75 will-change-auto"
+					class="pointer-events-none"
 				/>
 			{/if}
 			<!-- grid lines -->
@@ -267,17 +269,20 @@
 			{/each}
 
 			{#if isDm || game.phase === 'WARNING' || game.phase === 'SHRINKING'}
-				<g class={game.phase === 'WARNING' ? 'animate-pulse' : ''}>
-					<circle
-						cx={game.targetZone.x}
-						cy={game.targetZone.y}
-						r={game.targetZone.r}
-						fill="none"
-						stroke={game.phase === 'SHRINKING' ? '#ff4444' : '#fbbf24'}
-						stroke-width="0.3"
-						stroke-dasharray="2 1"
-						class="opacity-80"
-					/>
+				<!-- Fade on a wrapper so it doesn't fight the pulse's opacity animation -->
+				<g in:fade={{ duration: 300, easing: cubicOut }}>
+					<g class={game.phase === 'WARNING' ? 'animate-pulse' : ''}>
+						<circle
+							cx={game.targetZone.x}
+							cy={game.targetZone.y}
+							r={game.targetZone.r}
+							fill="none"
+							stroke={game.phase === 'SHRINKING' ? '#ff4444' : '#fbbf24'}
+							stroke-width="0.3"
+							stroke-dasharray="2 1"
+							class="opacity-80 transition-colors duration-300"
+						/>
+					</g>
 				</g>
 				{#if isDm}
 					<circle cx={game.targetZone.x} cy={game.targetZone.y} r="0.6" fill="#fbbf24" />
@@ -300,7 +305,7 @@
 				fill="none"
 				stroke={theme.accent}
 				stroke-width="0.5"
-				class="transition-colors duration-1000 will-change-auto zone-circle"
+				class="transition-colors duration-300 will-change-auto zone-circle"
 				style={`--zone-transition: ${zoneTransitionMs}ms`}
 			/>
 

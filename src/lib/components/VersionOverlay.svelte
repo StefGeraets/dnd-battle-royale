@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
+	import { prefersReducedMotion } from 'svelte/motion';
 	import { onMount } from 'svelte';
 	import { APP_VERSION } from '#lib/app-metadata.js';
 	import { latestRelease, RELEASES, ROADMAP, type RoadmapItem } from '#lib/release-notes.js';
@@ -50,7 +51,7 @@
 	>
 		<div
 			class="pointer-events-auto mt-6 mb-24 w-full max-w-md px-4"
-			transition:fly={{ y: -20, duration: 200 }}
+			transition:fly={{ y: prefersReducedMotion.current ? 0 : -20, duration: 200 }}
 		>
 			<div
 				class="rounded-lg border border-zinc-700 bg-zinc-950/95 p-4 shadow-2xl backdrop-blur-sm text-xs text-zinc-100 space-y-3"

@@ -40,15 +40,15 @@
 			<div class="h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
 				{#if game.phase === 'SHRINKING'}
 					<div
-						class="h-full bg-red-500 transition-all duration-100 ease-linear"
-						style="width: {((game.elapsedTime - game.shrinkStartTime) / game.shrinkDuration) *
-							100}%"
+						class="h-full w-full origin-left bg-red-500 transition-transform duration-100 ease-linear"
+						style="transform: scaleX({(game.elapsedTime - game.shrinkStartTime) /
+							game.shrinkDuration})"
 					></div>
 				{:else if game.nextRound}
 					{@const total = game.nextRound.triggerTime * 60 * 1000}
 					<div
-						class="h-full bg-zinc-700 transition-all duration-1000"
-						style="width: {(game.elapsedTime / total) * 100}%"
+						class="h-full w-full origin-left bg-zinc-700 transition-transform duration-100 ease-linear"
+						style="transform: scaleX({game.elapsedTime / total})"
 					></div>
 				{/if}
 			</div>
@@ -67,7 +67,7 @@
 		</div>
 
 		<button
-			class="w-full rounded py-2 text-sm font-bold shadow-lg transition-transform text-white active:scale-95 {game.isRunning
+			class="w-full rounded py-2 text-sm font-bold shadow-lg transition duration-150 ease-out text-white active:scale-[0.97] {game.isRunning
 				? 'bg-yellow-600 hover:bg-yellow-500'
 				: 'bg-green-600 hover:bg-green-500'}"
 			onclick={onToggle}
