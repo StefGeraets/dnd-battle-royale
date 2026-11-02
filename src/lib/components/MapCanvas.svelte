@@ -39,11 +39,11 @@
 		return Math.max(150, (game.shrinkDuration || DEFAULT_SHRINK_DURATION_MS) / QUALITY_STEPS_LOW); // LOW, fewer updates, longer smoothing
 	});
 
-	// Zone in screen pixels, shared by the storm mask and the ring glow
+	// Shared by the storm mask and the ring glow. Only the zone (map units) transitions;
+	// the map's screen position/size snaps, so resizes and map loads don't animate the hole.
 	let zoneVars = $derived(
-		`--zx: ${metrics.x + (game.currentZone.x * metrics.s) / 100}px;` +
-			`--zy: ${metrics.y + (game.currentZone.y * metrics.s) / 100}px;` +
-			`--zr: ${(game.currentZone.r * metrics.s) / 100}px;` +
+		`--zx: ${game.currentZone.x}; --zy: ${game.currentZone.y}; --zr: ${game.currentZone.r};` +
+			`--mx: ${metrics.x}px; --my: ${metrics.y}px; --ms: ${metrics.s}px;` +
 			`--zone-transition: ${zoneTransitionMs}ms`
 	);
 
@@ -326,35 +326,35 @@
 
 <style>
 	@property --zx {
-		syntax: '<length>';
+		syntax: '<number>';
 		inherits: false;
-		initial-value: 0px;
+		initial-value: 0;
 	}
 	@property --zy {
-		syntax: '<length>';
+		syntax: '<number>';
 		inherits: false;
-		initial-value: 0px;
+		initial-value: 0;
 	}
 	@property --zr {
-		syntax: '<length>';
+		syntax: '<number>';
 		inherits: false;
-		initial-value: 0px;
+		initial-value: 0;
 	}
 
 	.ring-glow {
 		background: radial-gradient(
-			circle var(--zr) at var(--zx) var(--zy),
-			transparent max(0px, calc(var(--zr) - var(--glow))),
-			color-mix(in srgb, var(--accent) 12%, transparent) calc(var(--zr) - var(--glow) / 2),
-			color-mix(in srgb, var(--accent) 40%, transparent) var(--zr),
-			color-mix(in srgb, var(--accent) 12%, transparent) calc(var(--zr) + var(--glow) / 2),
-			transparent calc(var(--zr) + var(--glow))
+			circle var(--cr) at var(--cx) var(--cy),
+			transparent max(0px, calc(var(--cr) - var(--glow))),
+			color-mix(in srgb, var(--accent) 12%, transparent) calc(var(--cr) - var(--glow) / 2),
+			color-mix(in srgb, var(--accent) 40%, transparent) var(--cr),
+			color-mix(in srgb, var(--accent) 12%, transparent) calc(var(--cr) + var(--glow) / 2),
+			transparent calc(var(--cr) + var(--glow))
 		);
 	}
 
 	.storm {
 		mask-image: radial-gradient(
-			circle var(--zr) at var(--zx) var(--zy),
+			circle var(--cr) at var(--cx) var(--cy),
 			transparent var(--edge),
 			black 100%
 		);
@@ -362,6 +362,9 @@
 
 	.storm,
 	.ring-glow {
+		--cx: calc(var(--mx) + var(--zx) * var(--ms) / 100);
+		--cy: calc(var(--my) + var(--zy) * var(--ms) / 100);
+		--cr: calc(var(--zr) * var(--ms) / 100);
 		transition:
 			--zx var(--zone-transition, 200ms) linear,
 			--zy var(--zone-transition, 200ms) linear,
