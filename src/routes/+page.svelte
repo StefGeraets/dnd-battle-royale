@@ -77,15 +77,19 @@
 
 		switch (e.code) {
 			case 'ArrowUp':
+			case 'KeyW':
 				game.movePlayer(0, -1);
 				break;
 			case 'ArrowDown':
+			case 'KeyS':
 				game.movePlayer(0, 1);
 				break;
 			case 'ArrowLeft':
+			case 'KeyA':
 				game.movePlayer(-1, 0);
 				break;
 			case 'ArrowRight':
+			case 'KeyD':
 				game.movePlayer(1, 0);
 				break;
 			case 'KeyZ':
